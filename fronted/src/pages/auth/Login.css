@@ -1,0 +1,325 @@
+:root {
+  --primary-color: #005085; /* Azul TEC */
+  --secondary-color: #005085;
+  --background-color: #F5F5F5;
+  --form-background: #E5E5E5;
+  --error-color: #dc3545;
+  --text-color: #333333;
+  --border-color: #AFB3BC;
+  --focus-color: #80bdff;
+}
+
+/* Estilos generales */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+  line-height: 1.5;
+  color: var(--text-color);
+  background-color: #fff;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Contenedor principal */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Encabezado */
+.login-header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  height: 60px;
+  position: relative; 
+}
+
+.tec-logo {
+  height: 36px;
+  width: auto;
+  position: absolute; 
+  left: 1rem; 
+}
+
+.datetime-info {
+  display: flex;
+  flex-direction: row; 
+  text-align: center;
+  font-size: 0.9rem;
+  gap: 10px;
+}
+
+/* Contenido principal */
+.login-main {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  background-color: white;
+}
+
+/* Contenedor del formulario */
+.login-box {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 380px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Imagen del campus */
+.campus-image {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+}
+
+.campus-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.login-form-container {
+  background-color: #E5E5E5;
+  padding: 1.5rem;
+  width: 100%;
+}
+
+/* Título */
+h1 {
+  color: var(--primary-color);
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+/* Formulario */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 0.75rem;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  padding-left: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--focus-color);
+  box-shadow: 0 0 0 2px rgba(0, 80, 133, 0.2);
+}
+
+/* Mensajes de error */
+.error-message {
+  color: var(--error-color);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Botón para mostrar/ocultar contraseña */
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+/* Botón de inicio de sesión */
+.login-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.65rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  width: 40%;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-inline-start: 100px;
+}
+
+.login-button:hover {
+  background-color: var(--primary-color);
+  opacity: 0.92;
+}
+
+/* Enlaces adicionales */
+.login-options {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.forgot-password, .admin-link {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.create-account {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.create-account-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  margin-inline-start: -130px;
+}
+
+/* Footer */
+.login-footer {
+  background-color: white;
+  padding: 0.75rem;
+  text-align: center;
+  border-top: 1px solid #EFEBEB;
+  position: relative;
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.contact-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding-left: 24px;
+}
+
+.contact-link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23005085'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+.copyright {
+  color: #666;
+  margin: 0 auto;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .login-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+    height: auto;
+    padding: 0.75rem;
+    position: static;
+  }
+  
+  .tec-logo {
+    position: static;
+    margin-bottom: 0.5rem;
+  }
+  
+  .datetime-info {
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .login-box {
+    max-width: 320px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding-top: 1.5rem;
+  }
+  
+  .contact-link {
+    position: static;
+    transform: none;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* Estilos para alto contraste */
+@media (forced-colors: active) {
+  .login-button {
+    border: 2px solid ButtonText;
+  }
+  
+  input {
+    border: 2px solid ButtonText;
+  }
+}
