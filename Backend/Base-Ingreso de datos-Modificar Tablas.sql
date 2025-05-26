@@ -269,3 +269,1168 @@ INSERT INTO public."Carrera" (id_carrera, nombre, "id_sedeXescuela") VALUES
 (32, ARRAY['Administración de Empresas - Nocturna'], 46),
 (33, ARRAY['Ingeniería en Producción Industrial'], 47),
 (34, ARRAY['Ingeniería en Computación'], 48);
+
+
+-- 1. Agregar el campo horas a la tabla Curso si no existe
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT FROM information_schema.columns 
+    WHERE table_name = 'Curso' AND column_name = 'horas'
+  ) THEN
+    ALTER TABLE public."Curso" ADD COLUMN horas integer;
+  END IF;
+END $$;
+
+-- 2. Modificar la capacidad del campo nombre en la tabla Curso
+ALTER TABLE public."Curso" 
+    ALTER COLUMN nombre TYPE character varying(100)[] USING nombre;
+
+
+
+
+-- 1. Modificar la tabla Requisitos para incluir el plan de estudios
+ALTER TABLE public."Requisitos" 
+ADD COLUMN id_plan integer;
+
+-- 2. Crear las tablas de Plan de Estudio
+CREATE TABLE IF NOT EXISTS public."PlanEstudio" (
+    id_plan SERIAL NOT NULL,
+    nombre character varying(100)[] NOT NULL,
+    id_carrera integer NOT NULL,
+    anio_inicio integer NOT NULL,
+    vigente boolean DEFAULT true,
+    CONSTRAINT "PlanEstudio_pkey" PRIMARY KEY (id_plan),
+    CONSTRAINT "FK_plan_carrera" FOREIGN KEY (id_carrera) 
+        REFERENCES public."Carrera"(id_carrera) ON DELETE CASCADE
+);
+ALTER TABLE public."PlanEstudio" OWNER TO postgres;
+
+CREATE TABLE IF NOT EXISTS public."PlanCurso" (
+    id_plan_curso SERIAL NOT NULL,
+    id_plan integer NOT NULL,
+    codigo_curso character varying(6) NOT NULL,
+    bloque integer NOT NULL,
+    optativo boolean DEFAULT false,
+    CONSTRAINT "PlanCurso_pkey" PRIMARY KEY (id_plan_curso),
+    CONSTRAINT "FK_planCurso_plan" FOREIGN KEY (id_plan) 
+        REFERENCES public."PlanEstudio"(id_plan) ON DELETE CASCADE,
+    CONSTRAINT "FK_planCurso_curso" FOREIGN KEY (codigo_curso) 
+        REFERENCES public."Curso"(codigo_curso) ON DELETE CASCADE
+);
+ALTER TABLE public."PlanCurso" OWNER TO postgres;
+
+-- 3. Agregar la referencia del plan a la tabla Requisitos
+ALTER TABLE public."Requisitos"
+ADD CONSTRAINT "FK_requisito_plan" FOREIGN KEY (id_plan) 
+    REFERENCES public."PlanEstudio"(id_plan) ON DELETE CASCADE;
+
+-- 4. Modificar la tabla Estudiante para agregar el plan de estudios
+ALTER TABLE public."Estudiante"
+ADD COLUMN id_plan integer,
+ADD CONSTRAINT "FK_estudiante_plan" FOREIGN KEY (id_plan) 
+    REFERENCES public."PlanEstudio"(id_plan);
+
+
+-- 6. Modificar la capacidad del campo nombre en la tabla Curso
+ALTER TABLE public."Curso" 
+    ALTER COLUMN nombre TYPE character varying(100)[] USING nombre;
+
+-- 7. Insertar cursos del plan de ATI
+INSERT INTO public."Curso" (codigo_curso, nombre, creditos, horas, id_escuela) VALUES
+-- Bloque 0
+('CI0200', ARRAY['EXAMEN DIAGNÓSTICO'], 0, 0, 7),
+('CI0202', ARRAY['INGLÉS BÁSICO'], 2, 3, 7),
+('MA0101', ARRAY['MATEMÁTICA GENERAL'], 2, 5, 26),
+
+-- Bloque 1
+('CI1106', ARRAY['COMUNICACIÓN ESCRITA'], 2, 6, 7),
+('MA1403', ARRAY['MATEMÁTICA DISCRETA'], 4, 4, 26),
+('SE1100', ARRAY['ACTIVIDAD CULTURAL I'], 0, 2, 10),
+('TI1102', ARRAY['INFORMACIÓN CONTABLE'], 3, 9, 2),
+('TI1103', ARRAY['MODELOS ORGANIZACIONALES Y GESTIÓN DE TI'], 3, 9, 2),
+('TI1400', ARRAY['INTRODUCCIÓN A LA PROGRAMACIÓN'], 3, 4, 2),
+('TI1401', ARRAY['TALLER DE PROGRAMACIÓN'], 3, 4, 2),
+
+-- Bloque 2
+('CI1107', ARRAY['COMUNICACIÓN ORAL'], 1, 3, 7),
+('FH1000', ARRAY['CENTROS DE FORMACIÓN HUMANÍSTICA'], 0, 2, 9),
+('MA1102', ARRAY['CÁLCULO DIFERENCIAL E INTEGRAL'], 4, 5, 26),
+('SE1200', ARRAY['ACTIVIDAD DEPORTIVA I'], 0, 2, 10),
+('TI1201', ARRAY['COMPORTAMIENTO ORGANIZACIONAL Y TALENTO HUMANO'], 3, 9, 2),
+('TI2402', ARRAY['ALGORITMOS Y ESTRUCTURAS DE DATOS'], 4, 4, 2),
+('TI2404', ARRAY['ORGANIZACIÓN Y ARQUITECTURA DE COMPUTADORAS'], 3, 4, 2),
+('TI4500', ARRAY['INGENIERÍA DE REQUERIMIENTOS'], 3, 4, 2),
+
+-- Bloque 3
+('CI3400', ARRAY['INGLÉS 1 (ATI)'], 2, 6, 7),
+('MA1103', ARRAY['CÁLCULO Y ALGEBRA LINEAL'], 4, 4, 26),
+('SE1400', ARRAY['ACTIVIDAD CULTURAL-DEPORTIVA'], 0, 2, 10),
+('TI2800', ARRAY['ADMINISTRACIÓN DE PROYECTOS I'], 3, 9, 2),
+('TI3103', ARRAY['COSTOS EN AMBIENTES INFORMÁTICOS'], 3, 4, 2),
+('TI3600', ARRAY['BASES DE DATOS'], 3, 4, 2),
+('TI4200', ARRAY['ECONOMÍA'], 3, 4, 2),
+
+-- Bloque 4
+('CI4401', ARRAY['INGLÉS II (ATI)'], 2, 6, 7),
+('MA2404', ARRAY['PROBABILIDADES'], 4, 4, 26),
+('TI2201', ARRAY['PROGRAMACIÓN ORIENTADA A OBJETOS'], 3, 9, 2),
+('TI3801', ARRAY['ADMINISTRACIÓN DE PROYECTOS II'], 3, 4, 2),
+('TI4101', ARRAY['PLANIFICACIÓN Y PRESUPUESTO'], 2, 4, 2),
+('TI4601', ARRAY['BASES DE DATOS AVANZADOS'], 4, 4, 2),
+
+-- Bloque 5
+('CS3404', ARRAY['SEMINARIO DE ÉTICA PARA LA INGENIERÍA'], 2, 5, 9),
+('MA3405', ARRAY['ESTADÍSTICA'], 4, 4, 26),
+('TI3500', ARRAY['MERCADEO EN LA ERA DIGITAL'], 3, 9, 2),
+('TI3501', ARRAY['FUNDAMENTOS DE SISTEMAS OPERATIVOS'], 3, 9, 2),
+('TI5100', ARRAY['GESTIÓN Y TOMA DE DECISIONES FINANCIERAS'], 3, 4, 2),
+('TI5501', ARRAY['DISEÑO DE SOFTWARE'], 3, 4, 2),
+
+-- Bloque 6
+('CS2304', ARRAY['DERECHO LABORAL'], 2, 3, 9),
+('TI3601', ARRAY['MODELO DE TOMA DE DECISIONES'], 2, 6, 2),
+('TI3602', ARRAY['PRODUCCIÓN, LOGÍSTICA Y CALIDAD'], 2, 6, 2),
+('TI3603', ARRAY['CALIDAD EN SISTEMAS DE INFORMACIÓN'], 3, 9, 2),
+('TI3604', ARRAY['FUNDAMENTOS DE REDES'], 3, 9, 2),
+('TI6900', ARRAY['INTELIGENCIA DE NEGOCIOS'], 3, 9, 2),
+('TI9003', ARRAY['COMPUTACIÓN Y SOCIEDAD'], 2, 4, 2),
+
+-- Bloque 7
+('CS3405', ARRAY['DERECHO INFORMÁTICO Y MERCANTIL'], 3, 9, 9),
+('TI4701', ARRAY['SEGURIDAD EN SISTEMAS DE INFORMACIÓN'], 3, 9, 2),
+('TI5000', ARRAY['ELECTIVA 1'], 3, 4, 2),
+('TI7503', ARRAY['ARQUITECTURA DE APLICACIONES'], 3, 9, 2),
+('TI7901', ARRAY['NEGOCIOS ELECTRÓNICOS'], 3, 4, 2),
+('TI8109', ARRAY['FORMULACIÓN Y EVALUACIÓN DE PROYECTOS DE TI'], 3, 4, 2),
+
+-- Bloque 8
+('TI6000', ARRAY['ELECTIVA 2'], 3, 9, 2),
+('TI8902', ARRAY['ADQUISICIÓN DE TI'], 3, 4, 2),
+('TI8904', ARRAY['ADMINISTRACIÓN DE PROCESOS DE NEGOCIOS'], 3, 9, 2),
+('TI8905', ARRAY['ADMINISTRACIÓN DE SERVICIOS DE TECNOLOGÍAS DE INFORMACIÓN I'], 3, 9, 2),
+('TI9805', ARRAY['AUDITORÍA DE TI'], 3, 4, 2),
+('TI9905', ARRAY['SISTEMAS DE INFORMACIÓN EMPRESARIAL'], 3, 4, 2),
+
+-- Bloque 9
+('TI5901', ARRAY['ESPÍRITU EMPRENDEDOR Y CREACIÓN DE EMPRESAS'], 3, 13, 2),
+('TI5902', ARRAY['ANALÍTICA EMPRESARIAL'], 3, 9, 2),
+('TI5903', ARRAY['PLANIFICACIÓN ESTRATÉGICA DE TECNOLOGÍA DE INFORMACIÓN'], 3, 9, 2),
+('TI5904', ARRAY['INVESTIGACIÓN EN SISTEMAS DE INFORMACIÓN'], 3, 9, 2),
+('TI5905', ARRAY['FUNDAMENTOS DE ARQUITECTURA EMPRESARIAL'], 3, 9, 2),
+('TI9004', ARRAY['ADMINISTRACIÓN DE SERVICIOS DE TECNOLOGÍAS DE INFORMACIÓN II'], 3, 9, 2),
+
+-- Bloque 10
+('TI9000', ARRAY['TRABAJO FINAL DE GRADUACIÓN'], 10, 0, 2)
+ON CONFLICT (codigo_curso) DO UPDATE 
+SET nombre = EXCLUDED.nombre, 
+    creditos = EXCLUDED.creditos, 
+    horas = EXCLUDED.horas, 
+    id_escuela = EXCLUDED.id_escuela;
+
+-- 8. Insertar el plan de estudios de ATI
+INSERT INTO public."PlanEstudio" (id_plan, nombre, id_carrera, anio_inicio, vigente) 
+VALUES (1, ARRAY['Plan 2023 - Administración de Tecnologías de Información'], 2, 2023, true)
+ON CONFLICT DO NOTHING;
+
+-- 9. Insertar los cursos en el plan por bloques
+INSERT INTO public."PlanCurso" (id_plan, codigo_curso, bloque) VALUES
+-- Bloque 0
+(1, 'CI0200', 0),
+(1, 'CI0202', 0),
+(1, 'MA0101', 0),
+
+-- Bloque 1
+(1, 'CI1106', 1),
+(1, 'MA1403', 1),
+(1, 'SE1100', 1),
+(1, 'TI1102', 1),
+(1, 'TI1103', 1),
+(1, 'TI1400', 1),
+(1, 'TI1401', 1),
+
+-- Bloque 2
+(1, 'CI1107', 2),
+(1, 'FH1000', 2),
+(1, 'MA1102', 2),
+(1, 'SE1200', 2),
+(1, 'TI1201', 2),
+(1, 'TI2402', 2),
+(1, 'TI2404', 2),
+(1, 'TI4500', 2),
+
+-- Bloque 3
+(1, 'CI3400', 3),
+(1, 'MA1103', 3),
+(1, 'SE1400', 3),
+(1, 'TI2800', 3),
+(1, 'TI3103', 3),
+(1, 'TI3600', 3),
+(1, 'TI4200', 3),
+
+-- Bloque 4
+(1, 'CI4401', 4),
+(1, 'MA2404', 4),
+(1, 'TI2201', 4),
+(1, 'TI3801', 4),
+(1, 'TI4101', 4),
+(1, 'TI4601', 4),
+
+-- Bloque 5
+(1, 'CS3404', 5),
+(1, 'MA3405', 5),
+(1, 'TI3500', 5),
+(1, 'TI3501', 5),
+(1, 'TI5100', 5),
+(1, 'TI5501', 5),
+
+-- Bloque 6
+(1, 'CS2304', 6),
+(1, 'TI3601', 6),
+(1, 'TI3602', 6),
+(1, 'TI3603', 6),
+(1, 'TI3604', 6),
+(1, 'TI6900', 6),
+(1, 'TI9003', 6),
+
+-- Bloque 7
+(1, 'CS3405', 7),
+(1, 'TI4701', 7),
+(1, 'TI5000', 7),
+(1, 'TI7503', 7),
+(1, 'TI7901', 7),
+(1, 'TI8109', 7),
+
+-- Bloque 8
+(1, 'TI6000', 8),
+(1, 'TI8902', 8),
+(1, 'TI8904', 8),
+(1, 'TI8905', 8),
+(1, 'TI9805', 8),
+(1, 'TI9905', 8),
+
+-- Bloque 9
+(1, 'TI5901', 9),
+(1, 'TI5902', 9),
+(1, 'TI5903', 9),
+(1, 'TI5904', 9),
+(1, 'TI5905', 9),
+(1, 'TI9004', 9),
+
+-- Bloque 10
+(1, 'TI9000', 10)
+ON CONFLICT DO NOTHING;
+
+-- 10. Insertar los requisitos y correquisitos específicos para el plan de ATI
+INSERT INTO public."Requisitos" (codigo_curso, codigo_requisito, tipo, id_plan) VALUES
+-- Bloque 1
+('TI1401', 'TI1400', 2, 1),  -- Correquisito
+
+-- Bloque 2
+('MA1102', 'MA0101', 1, 1),  -- Requisito
+('MA1102', 'MA1403', 1, 1),  -- Requisito
+('TI1201', 'TI1103', 1, 1),  -- Requisito
+('TI2402', 'TI1400', 1, 1),  -- Requisito
+('TI2402', 'TI1401', 1, 1),  -- Requisito
+('TI2404', 'TI1401', 1, 1),  -- Requisito
+('TI4500', 'TI1400', 1, 1),  -- Requisito
+
+-- Bloque 3
+('CI3400', 'CI0200', 1, 1),  -- Requisito
+('CI3400', 'CI0202', 1, 1),  -- Requisito
+('MA1103', 'MA1102', 1, 1),  -- Requisito
+('TI2800', 'TI4500', 1, 1),  -- Requisito
+('TI3103', 'TI1102', 1, 1),  -- Requisito
+('TI3600', 'MA1403', 1, 1),  -- Requisito
+('TI3600', 'TI2402', 1, 1),  -- Requisito
+('TI4200', 'MA1102', 1, 1),  -- Requisito
+
+-- Bloque 4
+('CI4401', 'CI3400', 1, 1),  -- Requisito
+('MA2404', 'MA1103', 1, 1),  -- Requisito
+('TI2201', 'TI3600', 1, 1),  -- Requisito
+('TI3801', 'TI2800', 1, 1),  -- Requisito
+('TI4101', 'TI3103', 1, 1),  -- Requisito
+('TI4601', 'TI3600', 1, 1),  -- Requisito
+
+-- Bloque 5
+('CS3404', 'TI3801', 1, 1),  -- Requisito
+('MA3405', 'MA2404', 1, 1),  -- Requisito
+('TI3500', 'MA2404', 1, 1),  -- Requisito
+('TI3501', 'TI2201', 1, 1),  -- Requisito
+('TI3501', 'TI2404', 1, 1),  -- Requisito
+('TI5100', 'TI4101', 1, 1),  -- Requisito
+('TI5100', 'TI4200', 1, 1),  -- Requisito
+('TI5501', 'TI2201', 1, 1),  -- Requisito
+('TI5501', 'TI4500', 1, 1),  -- Requisito
+
+-- Bloque 6
+('CS2304', 'CS3404', 1, 1),  -- Requisito
+('TI3601', 'MA3405', 1, 1),  -- Requisito
+('TI3601', 'TI5100', 1, 1),  -- Requisito
+('TI3602', 'MA3405', 1, 1),  -- Requisito
+('TI3602', 'TI5100', 1, 1),  -- Requisito
+('TI3603', 'TI3801', 1, 1),  -- Requisito
+('TI3603', 'TI5501', 1, 1),  -- Requisito
+('TI3604', 'TI3501', 1, 1),  -- Requisito
+('TI6900', 'TI4601', 1, 1),  -- Requisito
+('TI9003', 'CS3404', 1, 1),  -- Requisito
+('TI9003', 'TI1201', 1, 1),  -- Requisito
+
+-- Bloque 7
+('CS3405', 'TI1201', 1, 1),  -- Requisito
+('TI4701', 'TI3604', 1, 1),  -- Requisito
+('TI7503', 'TI3604', 1, 1),  -- Requisito
+('TI7503', 'TI5501', 1, 1),  -- Requisito
+('TI7901', 'TI3603', 1, 1),  -- Requisito
+('TI7901', 'TI6900', 1, 1),  -- Requisito
+('TI8109', 'TI3500', 1, 1),  -- Requisito
+('TI8109', 'TI3601', 1, 1),  -- Requisito
+
+-- Bloque 8
+('TI8902', 'TI7503', 1, 1),  -- Requisito
+('TI8902', 'TI8109', 1, 1),  -- Requisito
+('TI8904', 'TI7503', 1, 1),  -- Requisito
+('TI8905', 'TI4701', 1, 1),  -- Requisito
+('TI8905', 'TI7901', 1, 1),  -- Requisito
+('TI9805', 'TI4701', 1, 1),  -- Requisito
+('TI9905', 'TI7901', 1, 1),  -- Requisito
+
+-- Bloque 9
+('TI5901', 'TI8109', 1, 1),  -- Requisito
+('TI5902', 'TI9905', 1, 1),  -- Requisito
+('TI5903', 'TI8902', 1, 1),  -- Requisito
+('TI5904', 'TI8904', 1, 1),  -- Requisito
+('TI5904', 'TI9905', 1, 1),  -- Requisito
+('TI5905', 'TI8904', 1, 1),  -- Requisito
+('TI9004', 'TI8905', 1, 1),  -- Requisito
+
+-- Bloque 10
+('TI9000', 'TI5901', 1, 1),  -- Requisito
+('TI9000', 'TI5902', 1, 1),  -- Requisito
+('TI9000', 'TI5903', 1, 1),  -- Requisito
+('TI9000', 'TI5904', 1, 1),  -- Requisito
+('TI9000', 'TI5905', 1, 1),  -- Requisito
+('TI9000', 'TI9004', 1, 1)   -- Requisito
+ON CONFLICT DO NOTHING;
+
+-- 11. Agregar comentarios explicativos
+COMMENT ON COLUMN public."Curso".horas IS 'Horas de dedicación semanal del curso';
+COMMENT ON TABLE public."PlanEstudio" IS 'Almacena los diferentes planes de estudio de las carreras';
+COMMENT ON TABLE public."PlanCurso" IS 'Relaciona los cursos con sus respectivos planes de estudio y bloques';
+COMMENT ON COLUMN public."Requisitos".id_plan IS 'Plan específico al que aplica este requisito. NULL = aplica a todos los planes';
+COMMENT ON COLUMN public."Estudiante".id_plan IS 'Plan de estudios al que está asociado el estudiante';
+
+-- 12. Añadir índices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS "idx_plancurso_plan" ON public."PlanCurso" (id_plan);
+CREATE INDEX IF NOT EXISTS "idx_plancurso_curso" ON public."PlanCurso" (codigo_curso);
+CREATE INDEX IF NOT EXISTS "idx_requisitos_curso" ON public."Requisitos" (codigo_curso);
+CREATE INDEX IF NOT EXISTS "idx_requisitos_plan" ON public."Requisitos" (id_plan);
+
+
+
+
+-- 5. Insertar cursos de Ingeniería en Computación
+INSERT INTO public."Curso" (codigo_curso, nombre, creditos, horas, id_escuela) VALUES
+-- Bloque 0
+('CI0200', ARRAY['EXAMEN DIAGNÓSTICO'], 0, 0, 7),
+('CI0202', ARRAY['INGLÉS BÁSICO'], 2, 3, 7),
+('MA0101', ARRAY['MATEMÁTICA GENERAL'], 2, 5, 26),
+
+-- Bloque 1
+('CI1106', ARRAY['COMUNICACIÓN ESCRITA'], 2, 6, 7),
+('IC1400', ARRAY['FUNDAMENTOS DE ORGANIZACIÓN DE COMPUTADORAS'], 3, 9, 19),
+('IC1802', ARRAY['INTRODUCCIÓN A LA PROGRAMACIÓN'], 3, 4, 19),
+('IC1803', ARRAY['TALLER DE PROGRAMACIÓN'], 3, 4, 19),
+('MA1403', ARRAY['MATEMÁTICA DISCRETA'], 4, 4, 26),
+('SE1100', ARRAY['ACTIVIDAD CULTURAL I'], 0, 2, 10),
+
+-- Bloque 2
+('CI1107', ARRAY['COMUNICACIÓN ORAL'], 1, 3, 7),
+('CI1230', ARRAY['INGLÉS I'], 2, 6, 7),
+('FH1000', ARRAY['CENTROS DE FORMACIÓN HUMANÍSTICA'], 0, 2, 9),
+('IC2001', ARRAY['ESTRUCTURAS DE DATOS'], 4, 12, 19),
+('IC2101', ARRAY['PROGRAMACIÓN ORIENTADA A OBJETOS'], 3, 9, 19),
+('IC3101', ARRAY['ARQUITECTURA DE COMPUTADORES'], 4, 4, 19),
+('MA1102', ARRAY['CÁLCULO DIFERENCIAL E INTEGRAL'], 4, 5, 26),
+('SE1200', ARRAY['ACTIVIDAD DEPORTIVA I'], 0, 2, 10),
+
+-- Bloque 3
+('CI1231', ARRAY['INGLÉS II'], 2, 3, 7),
+('IC3002', ARRAY['ANÁLISIS DE ALGORITMOS'], 4, 12, 19),
+('IC4301', ARRAY['BASES DE DATOS I'], 4, 9, 19),
+('IC5821', ARRAY['REQUERIMIENTOS DE SOFTWARE'], 4, 12, 19),
+('MA1103', ARRAY['CÁLCULO Y ALGEBRA LINEAL'], 4, 4, 26),
+('SE1400', ARRAY['ACTIVIDAD CULTURAL-DEPORTIVA'], 0, 2, 10),
+
+-- Bloque 4
+('CS2101', ARRAY['AMBIENTE HUMANO'], 2, 6, 9),
+('IC4302', ARRAY['BASES DE DATOS II'], 3, 9, 19),
+('IC4700', ARRAY['LENGUAJES DE PROGRAMACIÓN'], 4, 4, 19),
+('IC6821', ARRAY['DISEÑO DE SOFTWARE'], 4, 12, 19),
+('MA2404', ARRAY['PROBABILIDADES'], 4, 4, 26),
+
+-- Bloque 5
+('CS3401', ARRAY['SEMINARIO DE ESTUDIOS FILOSÓFICOS HISTÓRICOS'], 2, 3, 9),
+('IC4810', ARRAY['ADMINISTRACIÓN DE PROYECTOS'], 4, 4, 19),
+('IC5701', ARRAY['COMPILADORES E INTERPRETES'], 4, 4, 19),
+('IC6831', ARRAY['ASEGURAMIENTO DE LA CALIDAD DEL SOFTWARE'], 3, 9, 19),
+('MA3405', ARRAY['ESTADÍSTICA'], 4, 4, 26),
+
+-- Bloque 6
+('CS4402', ARRAY['SEMINARIO DE ESTUDIOS COSTARRICENSES'], 2, 3, 9),
+('IC4003', ARRAY['ELECTIVA I'], 3, 4, 19),
+('IC6400', ARRAY['INVESTIGACIÓN DE OPERACIONES'], 4, 4, 19),
+('IC6600', ARRAY['PRINCIPIOS DE SISTEMAS OPERATIVOS'], 4, 4, 19),
+('IC7900', ARRAY['COMPUTACIÓN Y SOCIEDAD'], 2, 7, 19),
+('IC8071', ARRAY['SEGURIDAD DEL SOFTWARE'], 3, 9, 19),
+
+-- Bloque 7
+('AE4208', ARRAY['DESARROLLO DE EMPRENDEDORES'], 4, 4, 1),
+('IC5001', ARRAY['ELECTIVA II'], 3, 4, 19),
+('IC6200', ARRAY['INTELIGENCIA ARTIFICIAL'], 4, 4, 19),
+('IC7602', ARRAY['REDES'], 4, 12, 19),
+('IC7841', ARRAY['PROYECTO DE INGENIERÍA DE SOFTWARE'], 3, 9, 19),
+
+-- Bloque 8
+('IC8842', ARRAY['PRÁCTICA PROFESIONAL'], 12, 40, 19)
+ON CONFLICT (codigo_curso) DO UPDATE 
+SET nombre = EXCLUDED.nombre, 
+    creditos = EXCLUDED.creditos, 
+    horas = EXCLUDED.horas, 
+    id_escuela = EXCLUDED.id_escuela;
+
+-- 6. Insertar el plan de estudios de Ingeniería en Computación
+INSERT INTO public."PlanEstudio" (id_plan, nombre, id_carrera, anio_inicio, vigente) 
+VALUES (2, ARRAY['Plan 2023 - Ingeniería en Computación'], 3, 2023, true)
+ON CONFLICT DO NOTHING;
+
+-- 7. Insertar los cursos en el plan por bloques
+INSERT INTO public."PlanCurso" (id_plan, codigo_curso, bloque) VALUES
+-- Bloque 0
+(2, 'CI0200', 0),
+(2, 'CI0202', 0),
+(2, 'MA0101', 0),
+
+-- Bloque 1
+(2, 'CI1106', 1),
+(2, 'IC1400', 1),
+(2, 'IC1802', 1),
+(2, 'IC1803', 1),
+(2, 'MA1403', 1),
+(2, 'SE1100', 1),
+
+-- Bloque 2
+(2, 'CI1107', 2),
+(2, 'CI1230', 2),
+(2, 'FH1000', 2),
+(2, 'IC2001', 2),
+(2, 'IC2101', 2),
+(2, 'IC3101', 2),
+(2, 'MA1102', 2),
+(2, 'SE1200', 2),
+
+-- Bloque 3
+(2, 'CI1231', 3),
+(2, 'IC3002', 3),
+(2, 'IC4301', 3),
+(2, 'IC5821', 3),
+(2, 'MA1103', 3),
+(2, 'SE1400', 3),
+
+-- Bloque 4
+(2, 'CS2101', 4),
+(2, 'IC4302', 4),
+(2, 'IC4700', 4),
+(2, 'IC6821', 4),
+(2, 'MA2404', 4),
+
+-- Bloque 5
+(2, 'CS3401', 5),
+(2, 'IC4810', 5),
+(2, 'IC5701', 5),
+(2, 'IC6831', 5),
+(2, 'MA3405', 5),
+
+-- Bloque 6
+(2, 'CS4402', 6),
+(2, 'IC4003', 6),
+(2, 'IC6400', 6),
+(2, 'IC6600', 6),
+(2, 'IC7900', 6),
+(2, 'IC8071', 6),
+
+-- Bloque 7
+(2, 'AE4208', 7),
+(2, 'IC5001', 7),
+(2, 'IC6200', 7),
+(2, 'IC7602', 7),
+(2, 'IC7841', 7),
+
+-- Bloque 8
+(2, 'IC8842', 8)
+ON CONFLICT DO NOTHING;
+
+-- 8. Insertar los requisitos y correquisitos específicos para el plan de Ing. en Computación
+INSERT INTO public."Requisitos" (codigo_curso, codigo_requisito, tipo, id_plan) VALUES
+-- Bloque 1
+('IC1400', 'MA1403', 2, 2),  -- Correquisito
+
+-- Bloque 2
+('CI1107', 'CI1106', 1, 2),  -- Requisito
+('CI1230', 'CI0200', 1, 2),  -- Requisito
+('CI1230', 'CI0202', 1, 2),  -- Requisito
+('IC2001', 'IC2101', 2, 2),  -- Correquisito
+('IC2101', 'IC1802', 1, 2),  -- Requisito
+('IC2101', 'IC1803', 1, 2),  -- Requisito
+('IC3101', 'IC1400', 1, 2),  -- Requisito
+('IC3101', 'IC1803', 1, 2),  -- Requisito
+('MA1102', 'MA0101', 1, 2),  -- Requisito
+('MA1102', 'MA1403', 1, 2),  -- Requisito
+
+-- Bloque 3
+('CI1231', 'CI1230', 1, 2),  -- Requisito
+('IC3002', 'IC2001', 1, 2),  -- Requisito
+('IC3002', 'MA1102', 1, 2),  -- Requisito
+('IC4301', 'IC2001', 1, 2),  -- Requisito
+('IC4301', 'MA1103', 2, 2),  -- Correquisito
+('IC5821', 'IC4301', 2, 2),  -- Correquisito
+('MA1103', 'MA1102', 1, 2),  -- Requisito
+
+-- Bloque 4
+('CS2101', 'CI1107', 1, 2),  -- Requisito
+('IC4302', 'IC4301', 1, 2),  -- Requisito
+('IC4700', 'IC3002', 1, 2),  -- Requisito
+('IC4700', 'IC3101', 1, 2),  -- Requisito
+('IC6821', 'IC5821', 1, 2),  -- Requisito
+('MA2404', 'MA1103', 1, 2),  -- Requisito
+
+-- Bloque 5
+('CS3401', 'CS2101', 1, 2),  -- Requisito
+('IC4810', 'IC5821', 1, 2),  -- Requisito
+('IC5701', 'IC4700', 1, 2),  -- Requisito
+('IC6831', 'IC6821', 1, 2),  -- Requisito
+('IC6831', 'IC4810', 2, 2),  -- Correquisito
+('MA3405', 'MA2404', 1, 2),  -- Requisito
+
+-- Bloque 6
+('CS4402', 'CS3401', 1, 2),  -- Requisito
+('IC6400', 'MA3405', 1, 2),  -- Requisito
+('IC6600', 'IC5701', 1, 2),  -- Requisito
+('IC7900', 'IC4810', 1, 2),  -- Requisito
+('IC7900', 'CS4402', 2, 2),  -- Correquisito
+('IC8071', 'IC5701', 1, 2),  -- Requisito
+
+-- Bloque 7
+('AE4208', 'IC7841', 2, 2),  -- Correquisito
+('IC6200', 'IC5701', 1, 2),  -- Requisito
+('IC6200', 'IC6400', 1, 2),  -- Requisito
+('IC7602', 'IC6600', 1, 2),  -- Requisito
+('IC7841', 'IC4302', 1, 2),  -- Requisito
+('IC7841', 'IC6831', 1, 2),  -- Requisito
+
+-- Bloque 8
+('IC8842', 'AE4208', 1, 2),  -- Requisito
+('IC8842', 'FH1000', 1, 2),  -- Requisito
+('IC8842', 'IC4003', 1, 2),  -- Requisito
+('IC8842', 'IC5001', 1, 2),  -- Requisito
+('IC8842', 'IC6200', 1, 2),  -- Requisito
+('IC8842', 'IC7602', 1, 2),  -- Requisito
+('IC8842', 'IC7841', 1, 2),  -- Requisito
+('IC8842', 'SE1100', 1, 2),  -- Requisito
+('IC8842', 'SE1200', 1, 2),  -- Requisito
+('IC8842', 'SE1400', 1, 2)   -- Requisito
+ON CONFLICT DO NOTHING;
+
+-- 9. Agregar comentarios explicativos
+COMMENT ON COLUMN public."Curso".horas IS 'Horas de dedicación semanal del curso';
+COMMENT ON TABLE public."PlanEstudio" IS 'Almacena los diferentes planes de estudio de las carreras';
+COMMENT ON TABLE public."PlanCurso" IS 'Relaciona los cursos con sus respectivos planes de estudio y bloques';
+COMMENT ON COLUMN public."Requisitos".id_plan IS 'Plan específico al que aplica este requisito. NULL = aplica a todos los planes';
+COMMENT ON COLUMN public."Estudiante".id_plan IS 'Plan de estudios al que está asociado el estudiante';
+
+-- 10. Añadir índices para mejorar el rendimiento
+CREATE INDEX IF NOT EXISTS "idx_plancurso_plan" ON public."PlanCurso" (id_plan);
+CREATE INDEX IF NOT EXISTS "idx_plancurso_curso" ON public."PlanCurso" (codigo_curso);
+CREATE INDEX IF NOT EXISTS "idx_requisitos_curso" ON public."Requisitos" (codigo_curso);
+CREATE INDEX IF NOT EXISTS "idx_requisitos_plan" ON public."Requisitos" (id_plan);
+
+
+
+-- =============================================
+-- 1. INSERCIÓN DE PROFESORES
+-- =============================================
+
+-- Crear secuencia para los IDs de profesor si no existe
+CREATE SEQUENCE IF NOT EXISTS profesor_id_seq 
+    START WITH 1 
+    INCREMENT BY 1 
+    NO MINVALUE 
+    NO MAXVALUE 
+    CACHE 1;
+
+-- Insertar profesores para las diferentes escuelas
+INSERT INTO public."Profesor" (id_profesor, id_escuela, nombre) VALUES
+-- Profesores de ATI (Escuela 2)
+(nextval('profesor_id_seq')::integer, 2, ARRAY['María Elena Rodríguez']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Carlos Jiménez Sánchez']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Valeria Méndez Castro']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Alejandro Mora Rojas']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Diana Fonseca Vargas']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Roberto Pérez Alvarado']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Silvia Navarro Hidalgo']),
+(nextval('profesor_id_seq')::integer, 2, ARRAY['Gabriel Araya Solano']),
+
+-- Profesores de Computación (Escuela 19)
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Luis Quesada Ramírez']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Andrea Calderón Brenes']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Mario Segura Zamora']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Laura Campos Pacheco']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Esteban Murillo Soto']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Raquel Villalobos Cruz']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Jorge Zúñiga Madrigal']),
+(nextval('profesor_id_seq')::integer, 19, ARRAY['Adriana Chacón Varela']),
+
+-- Profesores de Matemática (Escuela 26)
+(nextval('profesor_id_seq')::integer, 26, ARRAY['Santiago Rojas Ugalde']),
+(nextval('profesor_id_seq')::integer, 26, ARRAY['Carmen Solís Morales']),
+(nextval('profesor_id_seq')::integer, 26, ARRAY['Fernando Moreira Quirós']),
+(nextval('profesor_id_seq')::integer, 26, ARRAY['Lucía Bonilla Castro']),
+
+-- Profesores de Ciencias del Lenguaje (Escuela 7)
+(nextval('profesor_id_seq')::integer, 7, ARRAY['Eduardo Miranda Sánchez']),
+(nextval('profesor_id_seq')::integer, 7, ARRAY['Natalia Herrera Chaves']),
+(nextval('profesor_id_seq')::integer, 7, ARRAY['Víctor Delgado Robles']),
+
+-- Profesores de Ciencias Sociales (Escuela 9)
+(nextval('profesor_id_seq')::integer, 9, ARRAY['Patricia Aguilar Mora']),
+(nextval('profesor_id_seq')::integer, 9, ARRAY['Mauricio Benavides Vargas']),
+(nextval('profesor_id_seq')::integer, 9, ARRAY['Cecilia López Alvarado']),
+
+-- Profesores de Cultura y Deporte (Escuela 10)
+(nextval('profesor_id_seq')::integer, 10, ARRAY['Gerardo Vega Chavarría']),
+(nextval('profesor_id_seq')::integer, 10, ARRAY['Carolina Rivas Monge']),
+(nextval('profesor_id_seq')::integer, 10, ARRAY['Javier Alfaro Castro']),
+
+-- Profesores de Administración de Empresas (Escuela 1)
+(nextval('profesor_id_seq')::integer, 1, ARRAY['Daniela Cordero Molina']),
+(nextval('profesor_id_seq')::integer, 1, ARRAY['Ricardo Salgado Torres'])
+ON CONFLICT (id_profesor) DO NOTHING;
+
+-- Resetear la secuencia para asegurar que comienza después del último ID insertado
+SELECT setval('profesor_id_seq', COALESCE((SELECT MAX(id_profesor) FROM public."Profesor"), 0) + 1);
+
+-- =============================================
+-- 2. CREACIÓN DE GRUPOS
+-- =============================================
+
+-- Crear secuencia para los IDs de grupo si no existe
+CREATE SEQUENCE IF NOT EXISTS grupo_id_seq 
+    START WITH 1 
+    INCREMENT BY 1 
+    NO MINVALUE 
+    NO MAXVALUE 
+    CACHE 1;
+
+-- Crear tabla auxiliar con los horarios estándar
+CREATE TEMPORARY TABLE horarios_estandar (
+    id SERIAL PRIMARY KEY,
+    descripcion VARCHAR(20),
+    hora_inicio TIME,
+    hora_fin TIME
+);
+
+INSERT INTO horarios_estandar (descripcion, hora_inicio, hora_fin) VALUES
+    ('7:30-9:20', '07:30:00', '09:20:00'),
+    ('9:30-11:20', '09:30:00', '11:20:00'),
+    ('13:00-14:50', '13:00:00', '14:50:00'),
+    ('15:00-16:50', '15:00:00', '16:50:00'),
+    ('17:00-18:50', '17:00:00', '18:50:00'),
+    ('19:00-20:50', '19:00:00', '20:50:00');
+
+-- Obtener todos los cursos disponibles
+WITH cursos_disponibles AS (
+    SELECT DISTINCT c.codigo_curso, c.id_escuela
+    FROM public."Curso" c
+)
+-- Insertar grupos para la sede Cartago (I Semestre)
+INSERT INTO public."Grupo" (
+    id_grupo, 
+    codigo_curso, 
+    "id_sedeXescuela", 
+    aula, 
+    horario, 
+    modalidad, 
+    periodo, 
+    cupos, 
+    id_profesor
+)
+SELECT 
+    nextval('grupo_id_seq')::integer,  -- ID grupo 1 para cada curso
+    cd.codigo_curso,
+    -- Cartago para primer grupo
+    CASE 
+        WHEN cd.id_escuela = 2 THEN 16  -- ATI en Cartago
+        WHEN cd.id_escuela = 19 THEN 17  -- Computación en Cartago
+        WHEN cd.id_escuela = 26 THEN 22  -- Matemática en Cartago
+        WHEN cd.id_escuela = 7 THEN 13  -- Ciencias Lenguaje en Cartago
+        WHEN cd.id_escuela = 9 THEN 14  -- Ciencias Sociales en Cartago
+        WHEN cd.id_escuela = 10 THEN 15  -- Cultura y Deporte en Cartago
+        ELSE 16  -- Default a ATI si no hay coincidencia
+    END,
+    ARRAY['A-' || (floor(random() * 300) + 101)::text],  -- Aula aleatoria
+    ARRAY[
+        CASE (floor(random() * 3))::integer
+            WHEN 0 THEN 'L ' || (SELECT descripcion FROM horarios_estandar WHERE id = 1 + (floor(random() * 2))::integer)  -- Mañana
+            WHEN 1 THEN 'K ' || (SELECT descripcion FROM horarios_estandar WHERE id = 3 + (floor(random() * 2))::integer)  -- Tarde
+            ELSE 'M ' || (SELECT descripcion FROM horarios_estandar WHERE id = 1 + (floor(random() * 2))::integer)  -- Mañana
+        END
+    ],
+    ARRAY[
+        CASE floor(random() * 3)::integer
+            WHEN 0 THEN 'PRESENCIAL'
+            WHEN 1 THEN 'VIRTUAL'
+            ELSE 'HÍBRIDO'
+        END
+    ],
+    1,  -- I Semestre
+    25 + floor(random() * 11)::integer,  -- Cupos entre 25 y 35
+    -- Escoger un profesor aleatorio de la misma escuela
+    (SELECT id_profesor FROM public."Profesor" 
+     WHERE id_escuela = cd.id_escuela 
+     ORDER BY random() LIMIT 1)
+FROM cursos_disponibles cd;
+
+
+WITH cursos_disponibles AS (
+    SELECT DISTINCT c.codigo_curso, c.id_escuela
+    FROM public."Curso" c
+)
+-- Insertar grupos para la sede San José (I Semestre)
+INSERT INTO public."Grupo" (
+    id_grupo, 
+    codigo_curso, 
+    "id_sedeXescuela", 
+    aula, 
+    horario, 
+    modalidad, 
+    periodo, 
+    cupos, 
+    id_profesor
+)
+SELECT 
+    nextval('grupo_id_seq')::integer,  -- ID grupo 2 para cada curso
+    cd.codigo_curso,
+    -- San José para segundo grupo
+    CASE 
+        WHEN cd.id_escuela = 2 THEN 41  -- ATI en San José
+        WHEN cd.id_escuela = 19 THEN 42  -- Computación en San José
+        WHEN cd.id_escuela = 26 THEN 47  -- Matemática en San José
+        WHEN cd.id_escuela = 7 THEN 38  -- Ciencias Lenguaje en San José
+        WHEN cd.id_escuela = 9 THEN 39  -- Ciencias Sociales en San José
+        WHEN cd.id_escuela = 10 THEN 40  -- Cultura y Deporte en San José
+        ELSE 41  -- Default a ATI si no hay coincidencia
+    END,
+    ARRAY['B-' || (floor(random() * 300) + 101)::text],  -- Aula aleatoria
+    ARRAY[
+        CASE (floor(random() * 3))::integer
+            WHEN 0 THEN 'J ' || (SELECT descripcion FROM horarios_estandar WHERE id = 5 + (floor(random() * 1))::integer)  -- Tarde-Noche
+            WHEN 1 THEN 'K-J ' || (SELECT descripcion FROM horarios_estandar WHERE id = 5)  -- 17:00-18:50
+            ELSE 'V ' || (SELECT descripcion FROM horarios_estandar WHERE id = 6)  -- 19:00-20:50
+        END
+    ],
+    ARRAY[
+        CASE floor(random() * 3)::integer
+            WHEN 0 THEN 'PRESENCIAL'
+            WHEN 1 THEN 'VIRTUAL'
+            ELSE 'HÍBRIDO'
+        END
+    ],
+    1,  -- I Semestre
+    25 + floor(random() * 11)::integer,  -- Cupos entre 25 y 35
+    -- Escoger un profesor aleatorio de la misma escuela
+    (SELECT id_profesor FROM public."Profesor" 
+     WHERE id_escuela = cd.id_escuela 
+     ORDER BY random() LIMIT 1)
+FROM cursos_disponibles cd;
+
+-- Insertar grupos para algunos cursos iniciales en San Carlos (II Semestre)
+WITH cursos_iniciales AS (
+    SELECT DISTINCT c.codigo_curso, c.id_escuela
+    FROM public."Curso" c
+    WHERE c.codigo_curso LIKE 'MA01%' OR c.codigo_curso LIKE 'CI02%' OR 
+          c.codigo_curso LIKE 'IC1%' OR c.codigo_curso LIKE 'TI1%' OR
+          c.codigo_curso LIKE 'SE1%'
+    LIMIT 15  -- Limitamos a algunos cursos iniciales
+)
+INSERT INTO public."Grupo" (
+    id_grupo, 
+    codigo_curso, 
+    "id_sedeXescuela", 
+    aula, 
+    horario, 
+    modalidad, 
+    periodo, 
+    cupos, 
+    id_profesor
+)
+SELECT 
+    nextval('grupo_id_seq')::integer,
+    ci.codigo_curso,
+    -- San Carlos para tercer grupo
+    CASE 
+        WHEN ci.id_escuela = 2 THEN 36  -- ATI en San Carlos
+        WHEN ci.id_escuela = 19 THEN 37  -- Computación en San Carlos
+        WHEN ci.id_escuela = 26 THEN 32  -- Matemática en San Carlos
+        WHEN ci.id_escuela = 7 THEN 33  -- Ciencias Lenguaje en San Carlos
+        WHEN ci.id_escuela = 9 THEN 34  -- Ciencias Sociales en San Carlos
+        WHEN ci.id_escuela = 10 THEN 35  -- Cultura y Deporte en San Carlos
+        ELSE 36  -- Default a ATI si no hay coincidencia
+    END,
+    ARRAY['C-' || (floor(random() * 200) + 101)::text],
+    ARRAY[
+        CASE (floor(random() * 3))::integer
+            WHEN 0 THEN 'L-M ' || (SELECT descripcion FROM horarios_estandar WHERE id = 3)  -- 13:00-14:50
+            WHEN 1 THEN 'K ' || (SELECT descripcion FROM horarios_estandar WHERE id = 1)  -- 7:30-9:20
+            ELSE 'M-V ' || (SELECT descripcion FROM horarios_estandar WHERE id = 2)  -- 9:30-11:20
+        END
+    ],
+    ARRAY[
+        CASE floor(random() * 3)::integer
+            WHEN 0 THEN 'PRESENCIAL'
+            WHEN 1 THEN 'VIRTUAL'
+            ELSE 'HÍBRIDO'
+        END
+    ],
+    2,  -- II Semestre
+    25 + floor(random() * 11)::integer,
+    -- Escoger un profesor aleatorio de la misma escuela
+    (SELECT id_profesor FROM public."Profesor" 
+     WHERE id_escuela = ci.id_escuela 
+     ORDER BY random() LIMIT 1)
+FROM cursos_iniciales ci;
+
+-- Resetear la secuencia para asegurar que comienza después del último ID insertado
+SELECT setval('grupo_id_seq', COALESCE((SELECT MAX(id_grupo) FROM public."Grupo"), 0) + 1);
+
+-- =============================================
+-- 3. CREACIÓN DE HORARIOS PARA CADA GRUPO
+-- =============================================
+
+-- Crear horarios para el día principal de cada grupo
+INSERT INTO public."HorarioClases" (
+    id_horario_clases,
+    id_grupo,
+    dia,
+    "horaInicio",
+    "horaFinal"
+)
+SELECT 
+    g.id_grupo * 10 + (CASE 
+                        WHEN position('L' in g.horario[1]) > 0 THEN 1
+                        WHEN position('K' in g.horario[1]) > 0 THEN 2
+                        WHEN position('M' in g.horario[1]) > 0 THEN 3
+                        WHEN position('J' in g.horario[1]) > 0 THEN 4
+                        WHEN position('V' in g.horario[1]) > 0 THEN 5
+                        ELSE 1 END),
+    g.id_grupo,
+    ARRAY[CASE 
+            WHEN position('L' in g.horario[1]) > 0 THEN 'LUNES'
+            WHEN position('K' in g.horario[1]) > 0 THEN 'MARTES'
+            WHEN position('M' in g.horario[1]) > 0 THEN 'MIÉRCOLES'
+            WHEN position('J' in g.horario[1]) > 0 THEN 'JUEVES'
+            WHEN position('V' in g.horario[1]) > 0 THEN 'VIERNES'
+            ELSE 'LUNES' END],
+    CASE 
+        WHEN position('7:30-9:20' in g.horario[1]) > 0 THEN '07:30:00'::time
+        WHEN position('9:30-11:20' in g.horario[1]) > 0 THEN '09:30:00'::time
+        WHEN position('13:00-14:50' in g.horario[1]) > 0 THEN '13:00:00'::time
+        WHEN position('15:00-16:50' in g.horario[1]) > 0 THEN '15:00:00'::time
+        WHEN position('17:00-18:50' in g.horario[1]) > 0 THEN '17:00:00'::time
+        WHEN position('19:00-20:50' in g.horario[1]) > 0 THEN '19:00:00'::time
+        ELSE '07:30:00'::time
+    END,
+    CASE 
+        WHEN position('7:30-9:20' in g.horario[1]) > 0 THEN '09:20:00'::time
+        WHEN position('9:30-11:20' in g.horario[1]) > 0 THEN '11:20:00'::time
+        WHEN position('13:00-14:50' in g.horario[1]) > 0 THEN '14:50:00'::time
+        WHEN position('15:00-16:50' in g.horario[1]) > 0 THEN '16:50:00'::time
+        WHEN position('17:00-18:50' in g.horario[1]) > 0 THEN '18:50:00'::time
+        WHEN position('19:00-20:50' in g.horario[1]) > 0 THEN '20:50:00'::time
+        ELSE '09:20:00'::time
+    END
+FROM public."Grupo" g
+ON CONFLICT DO NOTHING;
+
+-- Crear horarios para el día secundario de grupos que tienen dos días
+INSERT INTO public."HorarioClases" (
+    id_horario_clases,
+    id_grupo,
+    dia,
+    "horaInicio",
+    "horaFinal"
+)
+SELECT 
+    g.id_grupo * 10 + (CASE 
+                        WHEN position('-J' in g.horario[1]) > 0 THEN 4
+                        WHEN position('-V' in g.horario[1]) > 0 THEN 5
+                        WHEN position('-M' in g.horario[1]) > 0 THEN 3
+                        ELSE 2 END),
+    g.id_grupo,
+    ARRAY[CASE 
+            WHEN position('-J' in g.horario[1]) > 0 THEN 'JUEVES'
+            WHEN position('-V' in g.horario[1]) > 0 THEN 'VIERNES'
+            WHEN position('-M' in g.horario[1]) > 0 THEN 'MIÉRCOLES'
+            ELSE 'MARTES' END],
+    CASE 
+        WHEN position('7:30-9:20' in g.horario[1]) > 0 THEN '07:30:00'::time
+        WHEN position('9:30-11:20' in g.horario[1]) > 0 THEN '09:30:00'::time
+        WHEN position('13:00-14:50' in g.horario[1]) > 0 THEN '13:00:00'::time
+        WHEN position('15:00-16:50' in g.horario[1]) > 0 THEN '15:00:00'::time
+        WHEN position('17:00-18:50' in g.horario[1]) > 0 THEN '17:00:00'::time
+        WHEN position('19:00-20:50' in g.horario[1]) > 0 THEN '19:00:00'::time
+        ELSE '07:30:00'::time
+    END,
+    CASE 
+        WHEN position('7:30-9:20' in g.horario[1]) > 0 THEN '09:20:00'::time
+        WHEN position('9:30-11:20' in g.horario[1]) > 0 THEN '11:20:00'::time
+        WHEN position('13:00-14:50' in g.horario[1]) > 0 THEN '14:50:00'::time
+        WHEN position('15:00-16:50' in g.horario[1]) > 0 THEN '16:50:00'::time
+        WHEN position('17:00-18:50' in g.horario[1]) > 0 THEN '18:50:00'::time
+        WHEN position('19:00-20:50' in g.horario[1]) > 0 THEN '20:50:00'::time
+        ELSE '09:20:00'::time
+    END
+FROM public."Grupo" g
+WHERE g.horario[1] LIKE '%-%'  -- Solo para los que tienen formato con guión (dos días)
+ON CONFLICT DO NOTHING;
+
+-- =============================================
+-- 4. COMENTARIOS Y DOCUMENTACIÓN
+-- =============================================
+
+COMMENT ON TABLE public."Profesor" IS 'Almacena información de los profesores asociados a cada escuela';
+COMMENT ON TABLE public."Grupo" IS 'Almacena los grupos disponibles para cada curso';
+COMMENT ON TABLE public."HorarioClases" IS 'Detalla los días y horas específicas para cada grupo';
+COMMENT ON COLUMN public."Grupo".periodo IS '1=I Semestre, 2=II Semestre, 3=Verano';
+COMMENT ON COLUMN public."HorarioClases".dia IS 'Día de la semana en que se imparte la clase';
+
+
+
+
+-- Crear secuencia para los IDs de EstadoCurso si no existe
+CREATE SEQUENCE IF NOT EXISTS estado_curso_id_seq 
+    START WITH 1 
+    INCREMENT BY 1 
+    NO MINVALUE 
+    NO MAXVALUE 
+    CACHE 1;
+
+-- Insertar los estados básicos de un curso
+INSERT INTO public."EstadoCurso" ("id_estadoCurso", estado) VALUES
+(nextval('estado_curso_id_seq')::integer, ARRAY['APROBADO']),
+(nextval('estado_curso_id_seq')::integer, ARRAY['REPROBADO']),
+(nextval('estado_curso_id_seq')::integer, ARRAY['EN CURSO'])
+ON CONFLICT ("id_estadoCurso") DO NOTHING;
+
+-- Insertar estados adicionales que podrían ser útiles
+INSERT INTO public."EstadoCurso" ("id_estadoCurso", estado) VALUES
+(nextval('estado_curso_id_seq')::integer, ARRAY['RETIRADO']),
+(nextval('estado_curso_id_seq')::integer, ARRAY['CONGELADO']),
+(nextval('estado_curso_id_seq')::integer, ARRAY['SUFICIENCIA']),
+(nextval('estado_curso_id_seq')::integer, ARRAY['RECONOCIMIENTO'])
+ON CONFLICT ("id_estadoCurso") DO NOTHING;
+
+-- Resetear la secuencia para asegurar que comienza después del último ID insertado
+SELECT setval('estado_curso_id_seq', COALESCE((SELECT MAX("id_estadoCurso") FROM public."EstadoCurso"), 0) + 1);
+
+-- Agregar comentario explicativo
+COMMENT ON TABLE public."EstadoCurso" IS 'Estados posibles de un curso en el historial académico de un estudiante';
+
+
+
+
+
+-- 1. Crear secuencia para los IDs de proceso si no existe
+CREATE SEQUENCE IF NOT EXISTS proceso_id_seq 
+    START WITH 1 
+    INCREMENT BY 1 
+    NO MINVALUE 
+    NO MAXVALUE 
+    CACHE 1;
+
+-- 2. Crear algunos administradores si es necesario (si aún no existen)
+DO $$
+DECLARE
+    admin_count INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO admin_count FROM public."Administrativo";
+    
+    IF admin_count = 0 THEN
+        -- Crear administradores para distintas sedes/escuelas
+        INSERT INTO public."Administrativo" (id_admin, "id_sedeXescuela", id_departamento, "Rol") VALUES
+        (1, 16, 1, ARRAY['COORDINADOR']),  -- ATI en Cartago
+        (2, 17, 1, ARRAY['COORDINADOR']),  -- Computación en Cartago
+        (3, 41, 1, ARRAY['COORDINADOR']),  -- ATI en San José
+        (4, 42, 1, ARRAY['COORDINADOR']),  -- Computación en San José
+        (5, 36, 1, ARRAY['COORDINADOR']),  -- ATI en San Carlos
+        (6, 37, 1, ARRAY['COORDINADOR']),  -- Computación en San Carlos
+        (7, 22, 1, ARRAY['COORDINADOR']),  -- Matemática en Cartago
+        (8, 13, 1, ARRAY['COORDINADOR']),  -- Ciencias Lenguaje en Cartago
+        (9, 14, 1, ARRAY['COORDINADOR']),  -- Ciencias Sociales en Cartago
+        (10, 15, 1, ARRAY['COORDINADOR'])  -- Cultura y Deporte en Cartago
+        ON CONFLICT DO NOTHING;
+    END IF;
+END $$;
+
+-- 3. Crear procesos de matrícula por inclusión para el I Semestre 2025
+-- Para las principales sedes/escuelas
+INSERT INTO public."Procesos" (
+    id_proceso,
+    "tipoProceso",
+    "fechaInicio",
+    "fechaFinal",
+    estado,
+    "id_sedeXescuela",
+    id_admin
+)
+SELECT 
+    nextval('proceso_id_seq')::integer,
+    ARRAY['INCLUSIÓN'],
+    -- Fechas para I Semestre: después de matrícula ordinaria
+    '2025-02-17'::date,  -- 17 de febrero 2025
+    '2025-02-21'::date,  -- 21 de febrero 2025
+    true,  -- Activo
+    se."id_sedeXescuela",
+    -- Asignar administradores según sede/escuela
+    CASE 
+        WHEN se.id_sede = 1 AND se.id_escuela = 2 THEN 1  -- ATI en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 19 THEN 2  -- Computación en Cartago
+        WHEN se.id_sede = 3 AND se.id_escuela = 2 THEN 3  -- ATI en San José
+        WHEN se.id_sede = 3 AND se.id_escuela = 19 THEN 4  -- Computación en San José
+        WHEN se.id_sede = 2 AND se.id_escuela = 2 THEN 5  -- ATI en San Carlos
+        WHEN se.id_sede = 2 AND se.id_escuela = 19 THEN 6  -- Computación en San Carlos
+        WHEN se.id_sede = 1 AND se.id_escuela = 26 THEN 7  -- Matemática en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 7 THEN 8  -- Ciencias Lenguaje en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 9 THEN 9  -- Ciencias Sociales en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 10 THEN 10  -- Cultura y Deporte en Cartago
+        ELSE 1  -- Default
+    END
+FROM public."SedeEscuela" se
+-- Limitamos a las escuelas principales que ofrecen cursos
+WHERE se.id_escuela IN (2, 19, 26, 7, 9, 10);
+
+-- 4. Crear procesos de matrícula por inclusión para el II Semestre 2025
+INSERT INTO public."Procesos" (
+    id_proceso,
+    "tipoProceso",
+    "fechaInicio",
+    "fechaFinal",
+    estado,
+    "id_sedeXescuela",
+    id_admin
+)
+SELECT 
+    nextval('proceso_id_seq')::integer,
+    ARRAY['INCLUSIÓN'],
+    -- Fechas para II Semestre: después de matrícula ordinaria
+    '2025-07-21'::date,  -- 21 de julio 2025
+    '2025-07-25'::date,  -- 25 de julio 2025
+    false,  -- No activo aún
+    se."id_sedeXescuela",
+    -- Asignar administradores según sede/escuela
+    CASE 
+        WHEN se.id_sede = 1 AND se.id_escuela = 2 THEN 1  -- ATI en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 19 THEN 2  -- Computación en Cartago
+        WHEN se.id_sede = 3 AND se.id_escuela = 2 THEN 3  -- ATI en San José
+        WHEN se.id_sede = 3 AND se.id_escuela = 19 THEN 4  -- Computación en San José
+        WHEN se.id_sede = 2 AND se.id_escuela = 2 THEN 5  -- ATI en San Carlos
+        WHEN se.id_sede = 2 AND se.id_escuela = 19 THEN 6  -- Computación en San Carlos
+        WHEN se.id_sede = 1 AND se.id_escuela = 26 THEN 7  -- Matemática en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 7 THEN 8  -- Ciencias Lenguaje en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 9 THEN 9  -- Ciencias Sociales en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 10 THEN 10  -- Cultura y Deporte en Cartago
+        ELSE 1  -- Default
+    END
+FROM public."SedeEscuela" se
+-- Limitamos a las escuelas principales que ofrecen cursos
+WHERE se.id_escuela IN (2, 19, 26, 7, 9, 10);
+
+-- 5. Crear procesos de levantamiento de requisitos para el I Semestre 2025
+INSERT INTO public."Procesos" (
+    id_proceso,
+    "tipoProceso",
+    "fechaInicio",
+    "fechaFinal",
+    estado,
+    "id_sedeXescuela",
+    id_admin
+)
+SELECT 
+    nextval('proceso_id_seq')::integer,
+    ARRAY['LEVANTAMIENTO'],
+    -- Fechas para I Semestre: antes de matrícula ordinaria
+    '2025-01-20'::date,  -- 20 de enero 2025
+    '2025-01-31'::date,  -- 31 de enero 2025
+    true,  -- Activo
+    se."id_sedeXescuela",
+    -- Asignar administradores según sede/escuela
+    CASE 
+        WHEN se.id_sede = 1 AND se.id_escuela = 2 THEN 1  -- ATI en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 19 THEN 2  -- Computación en Cartago
+        WHEN se.id_sede = 3 AND se.id_escuela = 2 THEN 3  -- ATI en San José
+        WHEN se.id_sede = 3 AND se.id_escuela = 19 THEN 4  -- Computación en San José
+        WHEN se.id_sede = 2 AND se.id_escuela = 2 THEN 5  -- ATI en San Carlos
+        WHEN se.id_sede = 2 AND se.id_escuela = 19 THEN 6  -- Computación en San Carlos
+        WHEN se.id_sede = 1 AND se.id_escuela = 26 THEN 7  -- Matemática en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 7 THEN 8  -- Ciencias Lenguaje en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 9 THEN 9  -- Ciencias Sociales en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 10 THEN 10  -- Cultura y Deporte en Cartago
+        ELSE 1  -- Default
+    END
+FROM public."SedeEscuela" se
+-- Limitamos a las escuelas principales que ofrecen cursos
+WHERE se.id_escuela IN (2, 19, 26, 7, 9, 10);
+
+-- 6. Crear procesos de levantamiento de requisitos para el II Semestre 2025
+INSERT INTO public."Procesos" (
+    id_proceso,
+    "tipoProceso",
+    "fechaInicio",
+    "fechaFinal",
+    estado,
+    "id_sedeXescuela",
+    id_admin
+)
+SELECT 
+    nextval('proceso_id_seq')::integer,
+    ARRAY['LEVANTAMIENTO'],
+    -- Fechas para II Semestre: antes de matrícula ordinaria
+    '2025-06-23'::date,  -- 23 de junio 2025
+    '2025-07-04'::date,  -- 4 de julio 2025
+    false,  -- No activo aún
+    se."id_sedeXescuela",
+    -- Asignar administradores según sede/escuela
+    CASE 
+        WHEN se.id_sede = 1 AND se.id_escuela = 2 THEN 1  -- ATI en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 19 THEN 2  -- Computación en Cartago
+        WHEN se.id_sede = 3 AND se.id_escuela = 2 THEN 3  -- ATI en San José
+        WHEN se.id_sede = 3 AND se.id_escuela = 19 THEN 4  -- Computación en San José
+        WHEN se.id_sede = 2 AND se.id_escuela = 2 THEN 5  -- ATI en San Carlos
+        WHEN se.id_sede = 2 AND se.id_escuela = 19 THEN 6  -- Computación en San Carlos
+        WHEN se.id_sede = 1 AND se.id_escuela = 26 THEN 7  -- Matemática en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 7 THEN 8  -- Ciencias Lenguaje en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 9 THEN 9  -- Ciencias Sociales en Cartago
+        WHEN se.id_sede = 1 AND se.id_escuela = 10 THEN 10  -- Cultura y Deporte en Cartago
+        ELSE 1  -- Default
+    END
+FROM public."SedeEscuela" se
+-- Limitamos a las escuelas principales que ofrecen cursos
+WHERE se.id_escuela IN (2, 19, 26, 7, 9, 10);
+
+-- Resetear la secuencia para asegurar que comienza después del último ID insertado
+SELECT setval('proceso_id_seq', COALESCE((SELECT MAX(id_proceso) FROM public."Procesos"), 0) + 1);
+
+-- 7. Agregar comentarios explicativos
+COMMENT ON TABLE public."Procesos" IS 'Almacena información sobre procesos académicos como inclusiones y levantamientos';
+COMMENT ON COLUMN public."Procesos"."tipoProceso" IS 'Tipo de proceso: INCLUSIÓN, LEVANTAMIENTO, etc.';
+COMMENT ON COLUMN public."Procesos".estado IS 'true=activo, false=inactivo';
