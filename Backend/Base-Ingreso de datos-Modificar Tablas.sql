@@ -1434,3 +1434,43 @@ SELECT setval('proceso_id_seq', COALESCE((SELECT MAX(id_proceso) FROM public."Pr
 COMMENT ON TABLE public."Procesos" IS 'Almacena información sobre procesos académicos como inclusiones y levantamientos';
 COMMENT ON COLUMN public."Procesos"."tipoProceso" IS 'Tipo de proceso: INCLUSIÓN, LEVANTAMIENTO, etc.';
 COMMENT ON COLUMN public."Procesos".estado IS 'true=activo, false=inactivo';
+
+
+
+-- 1. Insertar las personas primero
+INSERT INTO public."Persona" (identificacion, id_tipo, nombre, apellido, correo, "contraseña")
+VALUES
+-- Estudiante
+(ARRAY['107890456'], 1, ARRAY['Juan Carlos'], ARRAY['Mora', 'Pérez'], ARRAY['jc.mora@estudiantec.cr'], ARRAY['estud123']),
+-- Coordinador
+(ARRAY['205670891'], 1, ARRAY['María Fernanda'], ARRAY['Jiménez', 'Sánchez'], ARRAY['mf.jimenez@itcr.ac.cr'], ARRAY['coord456']),
+-- Asistente
+(ARRAY['304560789'], 1, ARRAY['Roberto'], ARRAY['González', 'Ramírez'], ARRAY['roberto.gonzalez@itcr.ac.cr'], ARRAY['asis789'])
+ON CONFLICT (identificacion) DO NOTHING;
+
+-- 2. Insertar estudiante
+INSERT INTO public."Estudiante" (id_estudiante, carnet, id_sede, id_carrera)
+VALUES (
+    COALESCE((SELECT MAX(id_estudiante) FROM public."Estudiante"), 0) + 1, -- ID autoincremental
+    2023123456, -- Carnet
+    1,          -- Sede Cartago (id=1)
+    3           -- Carrera Ingeniería en Computación (id=3)
+);
+
+-- 3. Insertar administrativo coordinador
+INSERT INTO public."Administrativo" (id_admin, "id_sedeXescuela", id_departamento, "Rol")
+VALUES (
+    COALESCE((SELECT MAX(id_admin) FROM public."Administrativo"), 0) + 1, -- ID autoincremental
+    17,  -- Computación en Cartago (id=17)
+    1,   -- Departamento de Admisión y Registro (id=1)
+    ARRAY['COORDINADOR']
+);
+
+-- 4. Insertar administrativo asistente
+INSERT INTO public."Administrativo" (id_admin, "id_sedeXescuela", id_departamento, "Rol")
+VALUES (
+    COALESCE((SELECT MAX(id_admin) FROM public."Administrativo"), 0) + 1, -- ID autoincremental
+    17,  -- Computación en Cartago (id=17)
+    1,   -- Departamento de Admisión y Registro (id=1)
+    ARRAY['ASISTENTE']
+);
