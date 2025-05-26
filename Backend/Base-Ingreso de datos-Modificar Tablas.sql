@@ -155,3 +155,117 @@ INSERT INTO public."Escuela" (id_escuela, nombre) VALUES
 -- Agregar comentario a la tabla
 COMMENT ON TABLE public."Escuela" IS 'Almacena las escuelas académicas del TEC';
 
+-- PRIMERO: Aumentar la capacidad del campo nombre en tablas
+ALTER TABLE public."Carrera" 
+    ALTER COLUMN nombre TYPE character varying(100)[] USING nombre;
+
+-- SEGUNDO: Insertar relaciones entre sedes y escuelas
+INSERT INTO public."SedeEscuela" ("id_sedeXescuela", id_sede, id_escuela) VALUES
+-- Escuelas que están en todas las sedes
+-- Ciencias del Lenguaje (id=7)
+(1, 1, 7),  -- Cartago
+(2, 2, 7),  -- San Carlos
+(3, 3, 7),  -- San José
+(4, 4, 7),  -- Alajuela
+(5, 5, 7),  -- Limón
+-- Cultura y Deporte (id=10)
+(6, 1, 10),  -- Cartago
+(7, 2, 10),  -- San Carlos
+(8, 3, 10),  -- San José
+(9, 4, 10),  -- Alajuela
+(10, 5, 10), -- Limón
+-- Idiomas y Ciencias Sociales (id=14)
+(11, 1, 14), -- Cartago
+(12, 2, 14), -- San Carlos
+(13, 3, 14), -- San José
+(14, 4, 14), -- Alajuela
+(15, 5, 14), -- Limón
+
+-- CARTAGO (id=1)
+(16, 1, 1),  -- Administración de Empresas
+(17, 1, 19), -- Ingeniería en Computación
+(18, 1, 21), -- Ingeniería en Construcción
+(19, 1, 17), -- Ingeniería en Electrónica
+(20, 1, 24), -- Ingeniería Forestal
+(21, 1, 15), -- Ingeniería Agrícola
+(22, 1, 5),  -- Biología (para Biotecnología)
+(23, 1, 16), -- Ingeniería Electromecánica (para Mantenimiento Industrial)
+(24, 1, 22), -- Ingeniería en Producción Industrial
+(25, 1, 23), -- Ingeniería en Seguridad Laboral e Higiene Ambiental
+(26, 1, 6),  -- Ciencia e Ingeniería de los Materiales
+(27, 1, 27), -- Química (para Ingeniería Ambiental)
+(28, 1, 2),  -- Administración de Tecnologías de Información
+(29, 1, 11), -- Diseño Industrial
+(30, 1, 20), -- Ingeniería en Computadores
+(31, 1, 25), -- Ingeniería Mecatrónica
+(32, 1, 3),  -- Agronegocios
+(33, 1, 13), -- Física
+(34, 1, 26), -- Matemática
+
+-- SAN CARLOS (id=2)
+(35, 2, 18), -- Ingeniería en Agronomía
+(36, 2, 1),  -- Administración de Empresas
+(37, 2, 19), -- Ingeniería en Computación
+(38, 2, 22), -- Ingeniería en Producción Industrial
+(39, 2, 17), -- Ingeniería en Electrónica
+(40, 2, 3),  -- Agronegocios (para Gestión en Sostenibilidad Turística)
+
+-- SAN JOSÉ (id=3)
+(41, 3, 1),  -- Administración de Empresas
+(42, 3, 4),  -- Arquitectura y Urbanismo
+(43, 3, 19), -- Ingeniería en Computación
+
+-- ALAJUELA (id=4)
+(44, 4, 19), -- Ingeniería en Computación
+(45, 4, 17), -- Ingeniería en Electrónica
+
+-- LIMÓN (id=5)
+(46, 5, 1),  -- Administración de Empresas
+(47, 5, 22), -- Ingeniería en Producción Industrial
+(48, 5, 19); -- Ingeniería en Computación
+
+-- TERCERO: Insertar carreras asociadas a las relaciones sede-escuela
+INSERT INTO public."Carrera" (id_carrera, nombre, "id_sedeXescuela") VALUES
+-- CARTAGO
+(1, ARRAY['Administración de Empresas - Diurna'], 16),
+(2, ARRAY['Administración de Empresas - Nocturna'], 16),
+(3, ARRAY['Ingeniería en Computación'], 17),
+(4, ARRAY['Ingeniería en Construcción'], 18),
+(5, ARRAY['Ingeniería en Electrónica'], 19),
+(6, ARRAY['Ingeniería Forestal'], 20),
+(7, ARRAY['Ingeniería Agrícola'], 21),
+(8, ARRAY['Ingeniería en Biotecnología'], 22),
+(9, ARRAY['Ingeniería en Mantenimiento Industrial'], 23),
+(10, ARRAY['Ingeniería en Producción Industrial'], 24),
+(11, ARRAY['Ingeniería en Seguridad Laboral e Higiene Ambiental'], 25),
+(12, ARRAY['Ingeniería en Materiales'], 26),
+(13, ARRAY['Ingeniería Ambiental'], 27),
+(14, ARRAY['Administración de Tecnología de Información'], 28),
+(15, ARRAY['Ingeniería en Diseño Industrial'], 29),
+(16, ARRAY['Ingeniería en Computadores'], 30),
+(17, ARRAY['Ingeniería Mecatrónica'], 31),
+(18, ARRAY['Ingeniería en Agronegocios'], 32),
+(19, ARRAY['Ingeniería Física'], 33),
+(20, ARRAY['Enseñanza de la Matemática con Entornos Tecnológicos'], 34),
+
+-- SAN CARLOS
+(21, ARRAY['Ingeniería en Agronomía'], 35),
+(22, ARRAY['Administración de Empresas'], 36),
+(23, ARRAY['Ingeniería en Computación'], 37),
+(24, ARRAY['Ingeniería en Producción Industrial'], 38),
+(25, ARRAY['Ingeniería en Electrónica'], 39),
+(26, ARRAY['Gestión en Sostenibilidad Turística'], 40),
+
+-- SAN JOSÉ
+(27, ARRAY['Administración de Empresas - Nocturna'], 41),
+(28, ARRAY['Arquitectura y Urbanismo'], 42),
+(29, ARRAY['Ingeniería en Computación'], 43),
+
+-- ALAJUELA
+(30, ARRAY['Ingeniería en Computación'], 44),
+(31, ARRAY['Ingeniería en Electrónica'], 45),
+
+-- LIMÓN
+(32, ARRAY['Administración de Empresas - Nocturna'], 46),
+(33, ARRAY['Ingeniería en Producción Industrial'], 47),
+(34, ARRAY['Ingeniería en Computación'], 48);
