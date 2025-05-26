@@ -101,6 +101,110 @@ def listar_sedes():
             'message': f'Error al listar sedes: {str(e)}'
         }), 500
 
+# Endpoint para autenticación de usuarios
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    try:
+        # Obtener credenciales del request
+        data = request.json
+        
+        if not data or 'email' not in data or 'password' not in data:
+            return jsonify({
+                'status': 'error',
+                'message': 'Se requieren email y contraseña'
+            }), 400
+        
+        email = data['email']
+        password = data['password']
+        
+        # Determinar tipo de usuario basado en el dominio del correo
+        if '@estudiantec.cr' in email:
+            # Buscar estudiante en la base de datos
+            query = text("""
+                SELECT e.id_estudiante, e.carnet, e.id_sede, e.id_carrera, p.nombre, p.apellido, p."contraseña"
+                FROM "Estudiante" e
+                JOIN "Persona" p ON LOWER(p.correo[1]) = LOWER(:email)
+                WHERE LOWER(p.correo[1]) = LOWER(:email)
+            """)
+            result = db.session.execute(query, {"email": email})
+            user_data = result.fetchone()
+            
+            if not user_data:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Usuario no encontrado'
+                }), 404
+            
+            # Verificar contraseña (en producción usar hash)
+            if user_data.contraseña[0] != password:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Contraseña incorrecta'
+                }), 401
+            
+            return jsonify({
+                'status': 'success',
+                'userType': 'estudiante',
+                'user': {
+                    'id': user_data.id_estudiante,
+                    'email': email,
+                    'nombre': user_data.nombre[0] if user_data.nombre else '',
+                    'apellido': user_data.apellido[0] if user_data.apellido else '',
+                    'carnet': user_data.carnet,
+                    'id_sede': user_data.id_sede,
+                    'id_carrera': user_data.id_carrera
+                }
+            })
+            
+        elif '@itcr.ac.cr' in email:
+            # Buscar administrativo en la base de datos
+            query = text("""
+                SELECT a.id_admin, a."id_sedeXescuela", a.id_departamento, a."Rol", p.nombre, p.apellido, p."contraseña"
+                FROM "Administrativo" a
+                JOIN "Persona" p ON LOWER(p.correo[1]) = LOWER(:email)
+                WHERE LOWER(p.correo[1]) = LOWER(:email)
+            """)
+            result = db.session.execute(query, {"email": email})
+            user_data = result.fetchone()
+            
+            if not user_data:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Usuario no encontrado'
+                }), 404
+            
+            # Verificar contraseña (en producción usar hash)
+            if user_data.contraseña[0] != password:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Contraseña incorrecta'
+                }), 401
+            
+            return jsonify({
+                'status': 'success',
+                'userType': 'admin',
+                'user': {
+                    'id': user_data.id_admin,
+                    'email': email,
+                    'nombre': user_data.nombre[0] if user_data.nombre else '',
+                    'apellido': user_data.apellido[0] if user_data.apellido else '',
+                    'role': user_data.Rol[0] if user_data.Rol else 'USUARIO',
+                    'id_sedeXescuela': user_data.id_sedeXescuela,
+                    'id_departamento': user_data.id_departamento
+                }
+            })
+        else:
+            return jsonify({
+                'status': 'error',
+                'message': 'Dominio de correo no válido para este sistema'
+            }), 400
+            
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error en autenticación: {str(e)}'
+        }), 500
+
 # Ejecutar la aplicación
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import './Login.css';
 import logoTec from '../../assets/images/logo-tec.png'; 
-import campusBg from '../../assets/images/campus-bg.png'; // Asegúrate de tener esta imagen
+import campusBg from '../../assets/images/campus-bg.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const [currentTime, setCurrentTime] = useState(new Date());
+  
+  const navigate = useNavigate();
   
   // Actualizar la hora cada minuto
   useEffect(() => {
@@ -32,16 +38,23 @@ const Login = () => {
     year: 'numeric'
   });
 
+  // Validación mejorada del formulario
   const validateForm = () => {
     const newErrors = {};
     
-    if (!email) {
+    // Validar que el correo no esté vacío
+    if (!email.trim()) {
       newErrors.email = 'El correo electrónico es requerido';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
+      // Validar formato de correo
       newErrors.email = 'Formato de correo electrónico inválido';
+    } else if (!email.endsWith('@estudiantec.cr') && !email.endsWith('@itcr.ac.cr')) {
+      // Validar dominio institucional
+      newErrors.email = 'Debe usar un correo institucional (@estudiantec.cr o @itcr.ac.cr)';
     }
     
-    if (!password) {
+    // Validar que la contraseña no esté vacía
+    if (!password.trim()) {
       newErrors.password = 'La contraseña es requerida';
     }
     
@@ -49,14 +62,77 @@ const Login = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  // Manejar el envío del formulario
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Formulario enviado:', { email, password });
-      alert('Inicio de sesión exitoso (simulado)');
+    
+    // Limpiar mensaje de error previo
+    setLoginError('');
+    
+    // Validar el formulario
+    if (!validateForm()) {
+      return;
+    }
+    
+    // Activar estado de carga
+    setLoading(true);
+    
+    try {
+      // Enviar solicitud al endpoint de autenticación
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password
+      });
+      
+      // Verificar respuesta exitosa
+      if (response.data.status === 'success') {
+        // Guardar datos del usuario en localStorage
+        localStorage.setItem('userType', response.data.userType);
+        localStorage.setItem('userData', JSON.stringify(response.data.user));
+        
+        // Redireccionar según el tipo de usuario
+        if (response.data.userType === 'estudiante') {
+          navigate('/estudiante/dashboard');
+        } else if (response.data.userType === 'admin') {
+          navigate('/admin/dashboard');
+        }
+      } else {
+        // Manejar respuesta de error del servidor
+        setLoginError(response.data.message || 'Error en la autenticación');
+      }
+    } catch (error) {
+      console.error('Error al iniciar sesión:', error);
+      
+      // Manejar diferentes tipos de errores de la API
+      if (error.response) {
+        // El servidor respondió con un código de error
+        switch (error.response.status) {
+          case 400:
+            setLoginError('Datos de inicio de sesión incompletos');
+            break;
+          case 401:
+            setLoginError('Contraseña incorrecta');
+            break;
+          case 404:
+            setLoginError('Usuario no encontrado');
+            break;
+          default:
+            setLoginError(error.response.data.message || 'Error en el servidor');
+        }
+      } else if (error.request) {
+        // No se recibió respuesta del servidor
+        setLoginError('No hay respuesta del servidor. Verifique su conexión.');
+      } else {
+        // Error al configurar la solicitud
+        setLoginError('Error al procesar la solicitud');
+      }
+    } finally {
+      // Desactivar estado de carga al finalizar
+      setLoading(false);
     }
   };
 
+  // Alternar visibilidad de la contraseña
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -88,6 +164,13 @@ const Login = () => {
           <div className="login-form-container">
             <h1 id="login-title">Sistema de Matrícula</h1>
             
+            {/* Mensaje de error general */}
+            {loginError && (
+              <div className="login-error-message" role="alert">
+                {loginError}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="login-form" aria-labelledby="login-title">
               <div className="form-group">
                 <label htmlFor="email" className="visually-hidden">Correo electrónico</label>
@@ -107,6 +190,7 @@ const Login = () => {
                     aria-required="true"
                     aria-invalid={errors.email ? "true" : "false"}
                     aria-describedby={errors.email ? "email-error" : undefined}
+                    disabled={loading}
                   />
                 </div>
                 {errors.email && (
@@ -134,12 +218,14 @@ const Login = () => {
                     aria-required="true"
                     aria-invalid={errors.password ? "true" : "false"}
                     aria-describedby={errors.password ? "password-error" : undefined}
+                    disabled={loading}
                   />
                   <button 
                     type="button" 
                     className="password-toggle" 
                     onClick={togglePasswordVisibility}
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    disabled={loading}
                   >
                     {showPassword ? "Ocultar" : "Mostrar"}
                   </button>
@@ -155,8 +241,9 @@ const Login = () => {
                 type="submit" 
                 className="login-button"
                 aria-label="Iniciar sesión en el sistema"
+                disabled={loading}
               >
-                Ingresar
+                {loading ? "Procesando..." : "Ingresar"}
               </button>
             </form>
             
