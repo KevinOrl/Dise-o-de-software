@@ -61,6 +61,9 @@ const SolicitudesLevantamiento = () => {
             <>
               <div className="table-container">
                 <table className="solicitudes-table" aria-label="Tabla de solicitudes de levantamientos">
+                  <caption className="visually-hidden">
+                    Lista de cursos con solicitudes de levantamiento pendientes
+                  </caption>
                   <thead>
                     <tr>
                       <th scope="col" id="col-codigo">Código</th>
@@ -151,3 +154,4 @@ const SolicitudesLevantamiento = () => {
 };
 
 export default SolicitudesLevantamiento;
+

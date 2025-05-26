@@ -173,7 +173,7 @@ const Login = () => {
             
             <form onSubmit={handleSubmit} className="login-form" aria-labelledby="login-title">
               <div className="form-group">
-                <label htmlFor="email" className="visually-hidden">Correo electrónico</label>
+                <label htmlFor="email">Correo electrónico</label>
                 <div className="input-container">
                   <span className="input-icon" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -183,7 +183,6 @@ const Login = () => {
                   <input
                     type="email"
                     id="email"
-                    name="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="correo@estudiantec.cr"
@@ -201,7 +200,7 @@ const Login = () => {
               </div>
               
               <div className="form-group">
-                <label htmlFor="password" className="visually-hidden">Contraseña</label>
+                <label htmlFor="password">Contraseña</label>
                 <div className="input-container">
                   <span className="input-icon" aria-hidden="true">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -246,6 +245,13 @@ const Login = () => {
                 {loading ? "Procesando..." : "Ingresar"}
               </button>
             </form>
+            
+            {/* Para el estado de carga */}
+            {loading && (
+              <div className="loading-indicator" role="status" aria-live="polite">
+                Procesando solicitud...
+              </div>
+            )}
             
             <div className="login-options">
               <a 

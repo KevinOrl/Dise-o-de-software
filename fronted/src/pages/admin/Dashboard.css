@@ -103,6 +103,21 @@
   padding: 20px;
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #0c2d55;
+  color: white;
+  padding: 8px;
+  z-index: 1001;
+  transition: top 0.3s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .welcome-section h2 {
   margin-top: 0;
   color: #006064;
@@ -184,6 +199,31 @@
   color: #666;
 }
 
+:focus {
+  outline: 2px solid #4d90fe;
+  outline-offset: 2px;
+}
+
+/* Para elementos donde un contorno no sea ideal visualmente */
+.custom-focus:focus {
+  box-shadow: 0 0 0 3px rgba(77, 144, 254, 0.5);
+  outline: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Estilos para modo oscuro */
+  .barra-superior {
+    background-color: #001e3c;
+  }
+}
+
+@media (forced-colors: active) {
+  /* Estilos para modo alto contraste */
+  .btn-primary {
+    border: 2px solid ButtonText;
+  }
+}
+
 /* Media queries para responsive design */
 @media (max-width: 768px) {
   .footer-content {
@@ -191,4 +231,11 @@
     gap: 10px;
     text-align: center;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }               
 }

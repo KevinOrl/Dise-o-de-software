@@ -36,10 +36,18 @@ const AdminDashboard = () => {
     <div className="dashboard-container">
       <NavBar />
       
+      {/* Añadir skip link al inicio del componente */}
+      <a href="#main-content" className="skip-link">
+        Saltar al contenido principal
+      </a>
+      
       <div className="dashboard-content">
         <h1 className="main-title" color='#D3E0EB'>Sistema de monitoreo</h1>
         
-        <div className="content-area"></div>
+        {/* En el contenido principal */}
+        <main id="main-content" className="dashboard-content">
+          <div className="content-area"></div>
+        </main>
       </div>
       
       <footer className="dashboard-footer">
@@ -53,3 +61,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -42,6 +42,21 @@ const NavBar = () => {
     setShowMenu(!showMenu);
   };
 
+  // Agregar manejo de teclado al menú
+  const handleKeyDown = (e) => {
+    if (e.key === 'Escape' && showMenu) {
+      toggleMenu();
+    }
+  };
+
+  // Añadir en useEffect
+  useEffect(() => {
+    if (showMenu) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showMenu]);
+
   return (
     <header className="barra-superior">
       <div className="perfil-seccion">
@@ -92,13 +107,16 @@ const NavBar = () => {
       </div>
       
       <div className="logout-seccion">
-        <button 
-          className="logout-btn"
-          onClick={handleLogout}
-          aria-label="Cerrar sesión"
-        >
-          <span className="logout-icono">→</span>
-        </button>
+        <div className="logout-container">
+          <button 
+            className="logout-btn"
+            onClick={handleLogout}
+            aria-label="Cerrar sesión"
+          >
+            <span className="logout-icono">→</span>
+          </button>
+          <span className="logout-text">Salir</span>
+        </div>
       </div>
     </header>
   );

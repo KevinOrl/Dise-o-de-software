@@ -115,6 +115,12 @@
   padding-right: 15px;
 }
 
+.logout-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .logout-btn {
   background-color: transparent;
   border: none;
@@ -122,15 +128,35 @@
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
-  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 2px;
 }
+
+.logout-text {
+  color: white;
+  font-size: 0.75rem;  /* Texto pequeño */
+  text-align: center;
+}
+
+
 
 .logout-btn:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+:focus {
+  outline: 2px solid #4d90fe;
+  outline-offset: 2px;
+}
+
+/* Para elementos donde un contorno no sea ideal visualmente */
+.custom-focus:focus {
+  box-shadow: 0 0 0 3px rgba(77, 144, 254, 0.5);
+  outline: none;
 }
 
 /* Responsive */

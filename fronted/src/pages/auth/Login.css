@@ -329,6 +329,31 @@ input:focus {
   }
 }
 
+:focus {
+  outline: 2px solid #4d90fe;
+  outline-offset: 2px;
+}
+
+/* Para elementos donde un contorno no sea ideal visualmente */
+.custom-focus:focus {
+  box-shadow: 0 0 0 3px rgba(77, 144, 254, 0.5);
+  outline: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Estilos para modo oscuro */
+  .barra-superior {
+    background-color: #001e3c;
+  }
+}
+
+@media (forced-colors: active) {
+  /* Estilos para modo alto contraste */
+  .btn-primary {
+    border: 2px solid ButtonText;
+  }
+}
+
 /* Estilos para alto contraste */
 @media (forced-colors: active) {
   .login-button {
@@ -337,5 +362,12 @@ input:focus {
   
   input {
     border: 2px solid ButtonText;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
   }
 }
