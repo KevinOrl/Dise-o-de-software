@@ -1,0 +1,168 @@
+.barra-superior {
+  background-color: #0c2d55;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid #fdb913;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  height: 100px;
+}
+
+/* Sección de perfil con foto, info y opciones */
+.perfil-seccion {
+  display: flex;
+  height: 100%;
+}
+
+/* Contenedor de foto de perfil */
+.foto-contenedor {
+  height: 100%;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Contenedor para información y opciones */
+.info-opciones {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 10px 15px;
+}
+
+/* Información del usuario */
+.info-usuario {
+  display: flex;
+  flex-direction: column;
+}
+
+.nombre-usuario {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  display: block;
+}
+
+.rol-usuario {
+  font-size: 0.75rem;
+  display: block;
+  margin-top: 2px;
+}
+
+/* Botón de opciones */
+.opciones-dropdown {
+  position: relative;
+}
+
+.opciones-btn {
+  background: none;
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.icono-opciones {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+/* Menú desplegable */
+.menu-opciones {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 220px;
+  background-color: white;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  z-index: 1001;
+  margin-top: 5px;
+}
+
+.menu-opciones a {
+  display: block;
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.menu-opciones a:hover {
+  background-color: #f5f5f5;
+}
+
+/* Sección de hora y fecha */
+.tiempo-seccion {
+  font-size: 0.9rem;
+  flex: 1;
+  text-align: center;
+}
+
+/* Botón de cerrar sesión */
+.logout-seccion {
+  padding-right: 15px;
+}
+
+.logout-btn {
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .barra-superior {
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0;
+  }
+  
+  .perfil-seccion {
+    width: 100%;
+  }
+  
+  .tiempo-seccion {
+    width: 100%;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .logout-seccion {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  
+  .menu-opciones {
+    width: 100%;
+    left: 0;
+    right: 0;
+  }
+  
+
+}
