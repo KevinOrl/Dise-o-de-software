@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaFileAlt, FaSignOutAlt, FaUserCircle, FaChevronDown } from 'react-icons/fa';
 import HistorialSolicitudes from './HistorialSolicitudes';
 import HistorialRetiros from './HistorialRetiros';
-
+import MatriculasDisponibles from './MatriculasDisponibles';
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const MainPage = () => {
   };
 
   const opciones = [
-    { label: 'Matrículas Disponibles', action: () => setVistaActual('') },
+    { label: 'Matrículas Disponibles', action: () => setVistaActual('matriculas') },
     { label: 'Mi Historial Académico', action: () => setVistaActual('') },
     { label: 'Requisitos Pendientes', action: () => setVistaActual('') },
     { label: 'Código de PIN', action: () => setVistaActual('') },
@@ -115,6 +115,7 @@ const MainPage = () => {
       <main className="flex-1 flex justify-center items-start p-10">
         {vistaActual === 'solicitudes' && userData && (<HistorialSolicitudes idEstudiante={idEstudiante} />)}
         {vistaActual === 'retiros' && userData && (<HistorialRetiros idEstudiante={idEstudiante} />)}
+        {vistaActual === 'matriculas' && userData && (<MatriculasDisponibles idEstudiante={idEstudiante} />)}
         {!vistaActual && (
           <h2 className="text-xl font-semibold text-gray-400">Sistema de monitoreo</h2>
         )}

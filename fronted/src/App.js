@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 
 import Login from './pages/auth/Login';
-import EstudianteDashboard from './pages/estudiante/Dashboard';
 import AdminDashboard from './pages/admin/Dashboard';
 import SolicitudesLevantamiento from './pages/admin/Levantamientos/SolicitudesLevantamiento';
 import DetalleSolicitudesLevantamiento from './pages/admin/Levantamientos/DetalleSolicitudesLevantamiento';
@@ -20,7 +19,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/estudiante/dashboard" element={<EstudianteDashboard />} />
         <Route path="/estudiante" element={<MainPage />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         
