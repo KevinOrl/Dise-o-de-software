@@ -93,9 +93,14 @@ const NavBar = () => {
               <nav id="menu-opciones" className="menu-opciones">
                 <Link to="/admin/solicitudes-levantamiento">Solicitudes de levantamiento</Link>
                 <Link to="/admin/solicitudes-inclusiones">Solicitudes de inclusiones</Link>
-                <Link to="/admin/modificar-fechas">Modificar Fechas</Link>
                 <Link to="/admin/habilitar-procesos">Habilitar Procesos</Link>
-                <Link to="/admin/ayuda">Ayuda</Link>
+                <a 
+                  href="mailto:kevinnc0506@gmail.com?subject=Ayuda%20con%20el%20Sistema&body=Descripci%C3%B3n%20del%20problema%3A%0A%0A"
+                  className="menu-link"
+                  title="Enviar correo de ayuda"
+                >
+                  Ayuda
+                </a>
               </nav>
             )}
           </div>

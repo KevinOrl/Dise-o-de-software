@@ -1708,8 +1708,21 @@ SELECT
         LEFT JOIN 
             "Solicitudes" s ON s.id_grupo = g.id_grupo
         WHERE 
-            'Levantamiento' = ANY(s.tipo_solicitud) and g."id_sedeXescuela" = 17
+            'Inclusion' = ANY(s.tipo_solicitud) and g."id_sedeXescuela" = 17
         GROUP BY 
             c.codigo_curso, c.nombre, c.creditos, g.id_grupo
         ORDER BY
             c.codigo_curso
+            
+            
+            
+INSERT INTO public."Solicitudes" (id_solicitud, id_estudiante, id_grupo, tipo_solicitud, "fechaSolicitud", revisado, estado, motivo, comentario_admin) VALUES
+(7, 1, 106, ARRAY['Inclusion'], '2025-03-31', true, ARRAY['Aceptado'], ARRAY['Me gustaria llevar este curso para no atrasarme'], ARRAY['Entendido']),
+(8, 1, 111, ARRAY['Inclusion'], '2025-03-26', false, ARRAY['Pendiente'], ARRAY['Necesito llevar este curso'], NULL),
+(9, 1, 114, ARRAY['Levantamiento'], '2025-04-01', false, ARRAY['Pendiente'], ARRAY['No me quiero atrasar'], NULL);
+
+INSERT INTO public."HistorialSolicitudes" (id_historial_solicitud, id_estudiante, codigo_curso, fecha_retiro, semestre, año, id_solicitud) VALUES
+(1, 1, 'IC7841', '2025-03-31', 1, 2025, 1),
+(2, 1, 'CI1107', '2025-03-26', 1, 2025, 2),
+(3, 1, 'IC1802', '2025-04-01', 1, 2025, 3);
+            
