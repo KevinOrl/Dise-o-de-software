@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../NavBar';
-import './DetalleSolicitudLevantamientoIndividual.css';
+import './DetalleSolicitudInclusionIndividual.css';
 import logoTec from '../../../assets/images/logo-tec-white.png';
 import axios from 'axios';
 
-const DetalleSolicitudLevantamientoIndividual = () => {
+const DetalleSolicitudInclusionIndividual = () => {
   const { codigo, grupo, id } = useParams();
   const navigate = useNavigate();
 
@@ -38,7 +38,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
     const fetchDetalleSolicitud = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${API_URL}/api/solicitudes/levantamiento/${codigo}/${grupo}/${id}`);
+        const response = await axios.get(`${API_URL}/api/solicitudes/inclusion/${codigo}/${grupo}/${id}`);
         
         if (response.data.status === 'success') {
           setSolicitud(response.data.data.solicitud);
@@ -71,7 +71,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
 
     try {
       setProcesando(true);
-      const response = await axios.put(`${API_URL}/api/solicitudes/levantamiento/${id}/revisar`, { 
+      const response = await axios.put(`${API_URL}/api/solicitudes/inclusion/${id}/revisar`, { 
         comentario 
       });
       
@@ -116,7 +116,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
     setProcesando(true);
     
     try {
-      const response = await axios.put(`${API_URL}/api/solicitudes/levantamiento/${id}/aprobar`, { 
+      const response = await axios.put(`${API_URL}/api/solicitudes/inclusion/${id}/aprobar`, { 
         comentario 
       });
       
@@ -142,7 +142,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
     setProcesando(true);
     
     try {
-      const response = await axios.put(`${API_URL}/api/solicitudes/levantamiento/${id}/denegar`, { 
+      const response = await axios.put(`${API_URL}/api/solicitudes/inclusion/${id}/denegar`, { 
         comentario 
       });
       
@@ -219,7 +219,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
         <div className="breadcrumb-container">
           <button 
             className="volver-btn" 
-            onClick={() => navigate(`/admin/solicitudes-levantamiento/${codigo}/${grupo}`)}
+            onClick={() => navigate(`/admin/solicitudes-inclusion/${codigo}/${grupo}`)}
             aria-label="Volver al listado de solicitudes"
           >
             <span className="volver-icono" aria-hidden="true">&lt;</span> 
@@ -231,7 +231,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
           {/* Panel lateral izquierdo */}
           <div className="panel-izquierdo">
             <h2 className="solicitud-titulo">
-              Solicitud de Levantamiento #{String(solicitud.id).padStart(3, '0')}
+              Solicitud de Inclusion #{String(solicitud.id).padStart(3, '0')}
             </h2>
           </div>
 
@@ -325,7 +325,7 @@ const DetalleSolicitudLevantamientoIndividual = () => {
               
               <div className="motivo-container">
                 <div className="info-label">Motivo:</div>
-                <div className="motivo-texto">Solicitud de levantamiento</div>
+                <div className="motivo-texto">Solicitud de inclusion</div>
               </div>
               
               <div className="descripcion-container">
@@ -555,4 +555,4 @@ const DetalleSolicitudLevantamientoIndividual = () => {
   );
 };
 
-export default DetalleSolicitudLevantamientoIndividual;
+export default DetalleSolicitudInclusionIndividual;

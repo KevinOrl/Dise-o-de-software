@@ -10,6 +10,8 @@ import DetalleSolicitudesLevantamiento from './pages/admin/Levantamientos/Detall
 import DetalleSolicitudLevantamientoIndividual from './pages/admin/Levantamientos/DetalleSolicitudLevantamientoIndividual';
 import MainPage from './pages/estudiante/MainPage';
 import SolicitudesInclusion from './pages/admin/Inclusión/SolicitudesInclusion';
+import DetalleSolicitudesInclusion from './pages/admin/Inclusión/DetalleSolicitudesInclusion';
+import DetalleSolicitudInclusionIndividual from './pages/admin/Inclusión/DetalleSolicitudInclusionIndividual';
 
 
 function App() {
@@ -28,7 +30,8 @@ function App() {
         <Route path="/admin/solicitudes-levantamiento/:codigo/:grupo/:id" element={<DetalleSolicitudLevantamientoIndividual />} />
 
         <Route path="/admin/solicitudes-inclusiones" element={<SolicitudesInclusion />} />
-
+        <Route path="/admin/solicitudes-inclusion/:codigo/:grupo" element={<DetalleSolicitudesInclusion />} />
+        <Route path="/admin/solicitudes-inclusion/:codigo/:grupo/:id" element={<DetalleSolicitudInclusionIndividual />} />
 
         <Route path="/admin/horario" element={<div>Página de Horario</div>} />
         <Route path="/admin/informe" element={<div>Página de Informe</div>} />

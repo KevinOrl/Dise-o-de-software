@@ -108,7 +108,7 @@ const SolicitudesInclusion = () => {
                             <td headers="col-acciones">
                               <button 
                                 className="ver-solicitudes-btn"
-                                onClick={() => window.location.href = `/admin/solicitudes-levantamiento/${curso.codigo}/${curso.grupo}`}
+                                onClick={() => window.location.href = `/admin/solicitudes-inclusion/${curso.codigo}/${curso.grupo}`}
                                 aria-label={`Ver solicitudes para ${curso.nombre} grupo ${curso.grupo}`}
                               >
                                 Ver solicitudes
