@@ -137,14 +137,7 @@ h1 {
   align-items: center;
 }
 
-.input-icon {
-  position: absolute;
-  left: 12px;
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+
 
 input {
   width: 100%;
@@ -159,7 +152,7 @@ input {
 input:focus {
   outline: none;
   border-color: var(--focus-color);
-  box-shadow: 0 0 0 2px rgba(0, 80, 133, 0.2);
+  box-shadow: 0 0 0 2px #005085;
 }
 
 /* Mensajes de error */
@@ -343,7 +336,7 @@ input:focus {
 @media (prefers-color-scheme: dark) {
   /* Estilos para modo oscuro */
   .barra-superior {
-    background-color: #001e3c;
+    background-color: #005085;
   }
 }
 

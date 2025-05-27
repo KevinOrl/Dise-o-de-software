@@ -1318,6 +1318,292 @@ def cursos_disponibles(tipo):
         }), 500
 
 
+
+####PROCESOS
+#
+#
+#
+
+@app.route('/api/procesos/<int:id_sede_escuela>', methods=['GET'])
+@cross_origin()
+def get_procesos(id_sede_escuela):
+    """
+    Obtiene los procesos activos de inclusión y levantamiento para una sede/escuela específica
+    """
+    try:
+        # Consulta para obtener procesos por tipo
+        query = text("""
+        WITH RankedProcesos AS (
+            SELECT 
+                p.*,
+                ROW_NUMBER() OVER (PARTITION BY p."tipoProceso"[1] ORDER BY p.id_proceso DESC) as rn
+            FROM 
+                "Procesos" p
+            WHERE 
+                p."id_sedeXescuela" = :sede_escuela
+        )
+        SELECT 
+            id_proceso,
+            "tipoProceso"[1] as tipo_proceso,
+            "fechaInicio",
+            "fechaFinal",
+            estado,
+            "id_sedeXescuela",
+            id_admin
+        FROM 
+            RankedProcesos
+        WHERE 
+            rn = 1
+        ORDER BY 
+            "tipoProceso"[1]
+        """)
+        
+        result = db.session.execute(query, {"sede_escuela": id_sede_escuela})
+        
+        # Convertir resultados a diccionario
+        procesos = {}
+        for row in result:
+            procesos[row.tipo_proceso] = {
+                "id": row.id_proceso,
+                "tipo": row.tipo_proceso,
+                "fechaInicio": row.fechaInicio.strftime('%d/%m/%Y') if row.fechaInicio else None,
+                "fechaFinal": row.fechaFinal.strftime('%d/%m/%Y') if row.fechaFinal else None,
+                "estado": row.estado,
+                "id_sedeXescuela": row.id_sedeXescuela,
+                "id_admin": row.id_admin
+            }
+        
+        # Consulta para obtener historial de cambios
+        historial_query = text("""
+        SELECT 
+            h.id_historial,
+            h.fecha_accion,
+            h.accion,
+            h.id_proceso,
+            p."tipoProceso"[1] as tipo_proceso,
+            a."Rol"[1] as rol_admin,
+            pe.nombre[1] || ' ' || pe.apellido[1] as nombre_usuario
+        FROM 
+            "HistorialProcesos" h
+        INNER JOIN 
+            "Procesos" p ON h.id_proceso = p.id_proceso
+        INNER JOIN
+            "Administrativo" a ON h.id_admin = a.id_admin
+        INNER JOIN
+            "Persona" pe ON a.id_persona_fk = pe.id_persona_escalar
+        WHERE 
+            p."id_sedeXescuela" = :sede_escuela
+        ORDER BY 
+            h.fecha_accion DESC
+        LIMIT 10
+        """)
+        
+        historial_result = db.session.execute(historial_query, {"sede_escuela": id_sede_escuela})
+        
+        historial = []
+        for row in historial_result:
+            historial.append({
+                "id": row.id_historial,
+                "fecha": row.fecha_accion.strftime('%d/%m/%Y %H:%M'),
+                "usuario": row.nombre_usuario,
+                "proceso": row.tipo_proceso,
+                "accion": row.accion,
+                "rol": row.rol_admin.lower()
+            })
+        
+        return jsonify({
+            "status": "success",
+            "data": {
+                "procesos": procesos,
+                "historial": historial
+            },
+            "message": "Procesos obtenidos correctamente"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Error al obtener los procesos: {str(e)}"
+        }), 500
+
+@app.route('/api/procesos/<int:id_proceso>/toggle', methods=['PUT'])
+@cross_origin()
+def toggle_proceso(id_proceso):
+    """
+    Activa o desactiva un proceso
+    """
+    try:
+        data = request.get_json()
+        id_admin = data.get('id_admin')
+        
+        # Verificar si el proceso existe
+        proceso_query = text("""
+        SELECT 
+            id_proceso,
+            "tipoProceso"[1] as tipo_proceso,
+            "id_sedeXescuela",
+            estado
+        FROM 
+            "Procesos"
+        WHERE 
+            id_proceso = :id_proceso
+        """)
+        
+        proceso_result = db.session.execute(proceso_query, {"id_proceso": id_proceso})
+        proceso = proceso_result.fetchone()
+        
+        if not proceso:
+            return jsonify({
+                "status": "error",
+                "message": "Proceso no encontrado"
+            }), 404
+        
+        # Comprobar si hay otro proceso del mismo tipo activo para esa sede/escuela
+        if not proceso.estado:  # Si estamos activando
+            check_query = text("""
+            SELECT COUNT(*) as count
+            FROM "Procesos"
+            WHERE 
+                "id_sedeXescuela" = :sede_escuela AND
+                "tipoProceso"[1] = :tipo_proceso AND
+                estado = true AND
+                id_proceso != :id_proceso
+            """)
+            
+            check_result = db.session.execute(check_query, {
+                "sede_escuela": proceso.id_sedeXescuela,
+                "tipo_proceso": proceso.tipo_proceso,
+                "id_proceso": id_proceso
+            })
+            
+            if check_result.fetchone().count > 0:
+                return jsonify({
+                    "status": "error",
+                    "message": f"Ya existe un proceso de {proceso.tipo_proceso} activo para esta sede/escuela"
+                }), 400
+        
+        # Actualizar estado del proceso
+        update_query = text("""
+        UPDATE "Procesos"
+        SET estado = NOT estado
+        WHERE id_proceso = :id_proceso
+        RETURNING estado
+        """)
+        
+        update_result = db.session.execute(update_query, {"id_proceso": id_proceso})
+        nuevo_estado = update_result.fetchone().estado
+        
+        # Registrar en historial
+        accion = "Activación de proceso" if nuevo_estado else "Desactivación de proceso"
+        historial_query = text("""
+        INSERT INTO "HistorialProcesos" (fecha_accion, accion, id_proceso, id_admin)
+        VALUES (NOW(), :accion, :id_proceso, :id_admin)
+        """)
+        
+        db.session.execute(historial_query, {
+            "accion": accion,
+            "id_proceso": id_proceso,
+            "id_admin": id_admin
+        })
+        
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "data": {
+                "estado": nuevo_estado
+            },
+            "message": f"Proceso {'activado' if nuevo_estado else 'desactivado'} correctamente"
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "message": f"Error al modificar el estado del proceso: {str(e)}"
+        }), 500
+
+@app.route('/api/procesos/<int:id_proceso>/fechas', methods=['PUT'])
+@cross_origin()
+def actualizar_fechas_proceso(id_proceso):
+    """
+    Actualiza las fechas de inicio y fin de un proceso
+    """
+    try:
+        data = request.get_json()
+        fecha_inicio = data.get('fechaInicio')
+        fecha_final = data.get('fechaFinal')
+        id_admin = data.get('id_admin')
+        
+        # Validar fechas
+        if not fecha_inicio or not fecha_final:
+            return jsonify({
+                "status": "error",
+                "message": "Fechas de inicio y fin son requeridas"
+            }), 400
+            
+        fecha_inicio_dt = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+        fecha_final_dt = datetime.strptime(fecha_final, '%Y-%m-%d')
+        
+        if fecha_inicio_dt > fecha_final_dt:
+            return jsonify({
+                "status": "error",
+                "message": "La fecha de inicio no puede ser posterior a la fecha final"
+            }), 400
+        
+        # Actualizar fechas
+        update_query = text("""
+        UPDATE "Procesos"
+        SET 
+            "fechaInicio" = :fecha_inicio,
+            "fechaFinal" = :fecha_final
+        WHERE 
+            id_proceso = :id_proceso
+        RETURNING "tipoProceso"[1] as tipo_proceso
+        """)
+        
+        update_result = db.session.execute(update_query, {
+            "fecha_inicio": fecha_inicio,
+            "fecha_final": fecha_final,
+            "id_proceso": id_proceso
+        })
+        
+        tipo_proceso = update_result.fetchone()
+        
+        if not tipo_proceso:
+            return jsonify({
+                "status": "error",
+                "message": "Proceso no encontrado"
+            }), 404
+        
+        # Registrar en historial
+        historial_query = text("""
+        INSERT INTO "HistorialProcesos" (fecha_accion, accion, id_proceso, id_admin)
+        VALUES (NOW(), :accion, :id_proceso, :id_admin)
+        """)
+        
+        db.session.execute(historial_query, {
+            "accion": "Modificación de fechas",
+            "id_proceso": id_proceso,
+            "id_admin": id_admin
+        })
+        
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Fechas actualizadas correctamente"
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "status": "error",
+            "message": f"Error al actualizar fechas: {str(e)}"
+        }), 500
+
+
+
 # Ejecutar la aplicación
 if __name__ == '__main__':
     app.run(debug=True)

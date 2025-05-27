@@ -11,6 +11,8 @@ import MainPage from './pages/estudiante/MainPage';
 import SolicitudesInclusion from './pages/admin/Inclusión/SolicitudesInclusion';
 import DetalleSolicitudesInclusion from './pages/admin/Inclusión/DetalleSolicitudesInclusion';
 import DetalleSolicitudInclusionIndividual from './pages/admin/Inclusión/DetalleSolicitudInclusionIndividual';
+import HabilitarProcesos from './pages/admin/Procesos/HabilitarProcesos';
+
 
 
 function App() {
@@ -30,6 +32,8 @@ function App() {
         <Route path="/admin/solicitudes-inclusiones" element={<SolicitudesInclusion />} />
         <Route path="/admin/solicitudes-inclusion/:codigo/:grupo" element={<DetalleSolicitudesInclusion />} />
         <Route path="/admin/solicitudes-inclusion/:codigo/:grupo/:id" element={<DetalleSolicitudInclusionIndividual />} />
+
+        <Route path="/admin/habilitar-procesos" element={<HabilitarProcesos />} />
 
         <Route path="/admin/horario" element={<div>Página de Horario</div>} />
         <Route path="/admin/informe" element={<div>Página de Informe</div>} />
