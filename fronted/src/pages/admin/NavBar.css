@@ -105,6 +105,7 @@
 
 /* Sección de hora y fecha */
 .tiempo-seccion {
+  margin-right: 220px; /* Espacio para el botón de cerrar sesión */
   font-size: 0.9rem;
   flex: 1;
   text-align: center;
@@ -172,11 +173,7 @@
     width: 100%;
   }
   
-  .tiempo-seccion {
-    width: 100%;
-    padding: 10px;
-    text-align: left;
-  }
+
   
   .logout-seccion {
     position: absolute;

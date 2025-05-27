@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '../NavBar';
-import './DetalleSolicitudes.css';
+import './DetalleSolicitudesLevantamiento.css';
 import logoTec from '../../../assets/images/logo-tec-white.png';
 import axios from 'axios';
 
-const DetalleSolicitudes = () => {
+const DetalleSolicitudesLevantamiento = () => {
   const { codigo, grupo } = useParams();
   const navigate = useNavigate();
 
@@ -260,4 +260,4 @@ const DetalleSolicitudes = () => {
   );
 };
 
-export default DetalleSolicitudes;
+export default DetalleSolicitudesLevantamiento;

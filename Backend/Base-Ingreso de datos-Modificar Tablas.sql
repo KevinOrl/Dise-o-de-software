@@ -1569,3 +1569,147 @@ ALTER TABLE ONLY public."Estudiante"
 ALTER TABLE ONLY public."Administrativo"
     ADD CONSTRAINT "FK_administrativo_persona" FOREIGN KEY (id_persona_fk) 
     REFERENCES public."Persona" (id_persona_escalar);
+
+
+
+SELECT 
+            s.id_solicitud,
+            e.carnet,
+            p.nombre[1] || ' ' || p.apellido[1] as nombre_estudiante,
+            TO_CHAR(s."fechaSolicitud", 'DD/MM/YYYY') as fecha_solicitud,
+            -- Asignar prioridad basada en alguna lógica (por ejemplo, MOD de id_solicitud)
+            CASE 
+                WHEN s.id_solicitud % 3 = 0 THEN 'Alta'
+                WHEN s.id_solicitud % 3 = 1 THEN 'Media'
+                ELSE 'Baja'
+            END as prioridad,
+            s.estado[1] as estado
+        FROM 
+            "Solicitudes" s
+        INNER JOIN 
+            "Estudiante" e ON e.id_estudiante = s.id_estudiante
+        INNER JOIN 
+            "Persona" p ON p.id_persona_escalar = e.id_persona_fk
+        WHERE 
+            s.id_grupo = :grupo AND
+            'Levantamiento' = ANY(s.tipo_solicitud)
+        ORDER BY
+            -- Ordenar por prioridad (Alta, Media, Baja) y luego por ID
+            CASE 
+                WHEN s.id_solicitud % 3 = 0 THEN 1  -- Alta primero
+                WHEN s.id_solicitud % 3 = 1 THEN 2  -- Media segundo
+                ELSE 3  -- Baja último
+            END,
+            s.id_solicitud
+            
+SELECT 
+            c.codigo_curso, 
+            c.nombre as nombre, 
+            c.creditos,
+            g.id_grupo
+        FROM 
+            public."Curso" c  
+        INNER JOIN 
+            "Grupo" g ON g.codigo_curso = c.codigo_curso 
+        WHERE 
+            c.codigo_curso = 'IC4302' AND g.id_grupo = 50
+            
+SELECT 
+            c2.codigo_curso,
+            c2.nombre as nombre,
+            r.tipo
+        FROM 
+            "Requisitos" r
+        INNER JOIN 
+            "Curso" c2 ON c2.codigo_curso = r.codigo_requisito
+        WHERE 
+            r.codigo_curso = 'IC4302'
+
+-- Añadir campo comentario_admin como array de strings a la tabla Solicitudes
+ALTER TABLE public."Solicitudes" 
+ADD COLUMN comentario_admin character varying(255)[] NULL; 
+            
+SELECT 
+            s.id_solicitud,
+            e.carnet,
+            s."fechaSolicitud",
+            to_char(s."fechaSolicitud", 'DD/MM/YYYY') as fecha_solicitud,
+            s.revisado,
+            s.estado[1] as estado,
+            s.motivo[1] as motivo,
+            s.comentario_admin[1] as comentario_admin,
+            CASE 
+                WHEN s.id_solicitud % 3 = 0 THEN 'Alta'
+                WHEN s.id_solicitud % 3 = 1 THEN 'Media'
+                ELSE 'Baja'
+            END as prioridad
+        FROM 
+            "Solicitudes" s
+        INNER JOIN 
+            "Estudiante" e ON e.id_estudiante = s.id_estudiante
+        WHERE 
+            s.id_solicitud = 1 AND
+            s.id_grupo = 50
+            
+SELECT 
+            e.carnet,
+            p.nombre[1] || ' ' || p.apellido[1] as nombre,
+            p.correo[1] as correo,
+            e.telefono as telefono
+        FROM 
+            "Estudiante" e
+        INNER JOIN 
+            "Persona" p ON p.id_persona_escalar = e.id_persona_fk
+        WHERE 
+            e.carnet = 2023147852         
+
+ALTER TABLE public."Estudiante"
+ADD COLUMN telefono character varying(20);
+
+SELECT revisado FROM public."Solicitudes"
+        WHERE id_solicitud = 1            
+        
+SELECT a.id_admin, a."id_sedeXescuela", a.id_departamento, a."Rol"[1], p.nombre, p.apellido, p."contraseña"
+                FROM "Administrativo" a
+                JOIN "Persona" p ON LOWER(p.correo[1]) = LOWER(:email)
+                WHERE LOWER(p.correo[1]) = LOWER(:email)        
+                
+                
+UPDATE public."Solicitudes"
+        SET 
+            revisado = TRUE,
+            estado = ARRAY['Pendiente']::varchar[],
+            comentario_admin = ARRAY['apruebo']::varchar[]
+        WHERE 
+            id_solicitud = 1 AND
+            'Levantamiento' = ANY(tipo_solicitud)
+        RETURNING id_solicitud             
+        
+        
+select * from public."Curso" c  inner join "Grupo" g on g.codigo_curso  = c.codigo_curso where c.codigo_curso = 'IC4003' or c.codigo_curso = 'IC6831'
+        
+        
+INSERT INTO public."Solicitudes" (id_solicitud, id_estudiante, id_grupo, tipo_solicitud, "fechaSolicitud", revisado, estado, motivo) VALUES 
+(5, 1, 11, -- ID del grupo
+ '{"Inclusion"}', '2025-05-20', false, '{"Pendiente"}', '{"Necesito el curso para poder graduarme este semestre y ya he aprobado todos los requisitos."}'),
+ (6, 1, 129, -- ID del grupo
+ '{"Inclusion"}', '2025-05-20', false, '{"Pendiente"}', '{"Necesito el curso para poder graduarme este semestre y ya he aprobado todos los requisitos."}')
+ 
+SELECT 
+            c.codigo_curso, 
+            c.nombre as nombre, 
+            c.creditos, 
+            g.id_grupo, 
+            COUNT(s.id_solicitud) as total_solicitudes
+        FROM 
+            public."Curso" c  
+        INNER JOIN 
+            "Grupo" g ON g.codigo_curso = c.codigo_curso 
+        LEFT JOIN 
+            "Solicitudes" s ON s.id_grupo = g.id_grupo
+        WHERE 
+            'Levantamiento' = ANY(s.tipo_solicitud) and g."id_sedeXescuela" = 17
+        GROUP BY 
+            c.codigo_curso, c.nombre, c.creditos, g.id_grupo
+        ORDER BY
+            c.codigo_curso

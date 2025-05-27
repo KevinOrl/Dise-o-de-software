@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '../NavBar';
-import './SolicitudesLevantamiento.css';
+import './SolicitudesInclusiones.css';
 import logoTec from '../../../assets/images/logo-tec-white.png';
 import axios from 'axios'; // Asegúrate de tener axios instalado: npm install axios
 
-const SolicitudesLevantamiento = () => {
+const SolicitudesInclusion = () => {
   // Estados para manejar los datos y la paginación
   const [cursos, setCursos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -31,7 +31,7 @@ const SolicitudesLevantamiento = () => {
           setLoading(false);
           return;
         }
-        const response = await axios.get(`${API_URL}/api/solicitudes/levantamiento/${userData.id_sedeXescuela}`);
+        const response = await axios.get(`${API_URL}/api/solicitudes/inclusiones/${userData.id_sedeXescuela}`);
         
         if (response.data.status === 'success') {
           setCursos(response.data.data);
@@ -62,7 +62,7 @@ const SolicitudesLevantamiento = () => {
       <NavBar />
       
       <div className="dashboard-content">
-        <h1 className="main-title">Solicitudes de Levantamientos</h1>
+        <h1 className="main-title">Solicitudes de Inclusiones</h1>
         
         <div className="content-area">
           {loading ? (
@@ -76,9 +76,9 @@ const SolicitudesLevantamiento = () => {
           ) : (
             <>
               <div className="table-container">
-                <table className="solicitudes-table" aria-label="Tabla de solicitudes de levantamientos">
+                <table className="solicitudes-table" aria-label="Tabla de solicitudes de inclusiones">
                   <caption className="visually-hidden">
-                    Lista de cursos con solicitudes de levantamiento pendientes
+                    Lista de cursos con solicitudes de inclusiones pendientes
                   </caption>
                   <thead>
                     <tr>
@@ -93,7 +93,7 @@ const SolicitudesLevantamiento = () => {
                   <tbody>
                     {cursos.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="no-data-message">No hay solicitudes de levantamiento disponibles</td>
+                        <td colSpan="6" className="no-data-message">No hay solicitudes de inclusion disponibles</td>
                       </tr>
                     ) : (
                       cursos
@@ -168,5 +168,5 @@ const SolicitudesLevantamiento = () => {
   );
 };
 
-export default SolicitudesLevantamiento;
+export default SolicitudesInclusion;
 

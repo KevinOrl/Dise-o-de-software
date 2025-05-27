@@ -205,9 +205,9 @@ def login():
             'message': f'Error en autenticación: {str(e)}'
         }), 500
 
-@app.route('/api/solicitudes/levantamiento', methods=['GET'])
+@app.route('/api/solicitudes/levantamiento/<sedexescuela>', methods=['GET'])
 @cross_origin()
-def get_solicitudes_levantamiento():
+def get_solicitudes_levantamiento(sedexescuela):
     """
     Obtiene la lista de cursos con sus solicitudes de levantamiento
     agrupados por curso y grupo
@@ -228,7 +228,7 @@ def get_solicitudes_levantamiento():
         LEFT JOIN 
             "Solicitudes" s ON s.id_grupo = g.id_grupo
         WHERE 
-            'Levantamiento' = ANY(s.tipo_solicitud)
+            'Levantamiento' = ANY(s.tipo_solicitud) and g."id_sedeXescuela" = :sedexescuela
         GROUP BY 
             c.codigo_curso, c.nombre, c.creditos, g.id_grupo
         ORDER BY
@@ -236,7 +236,7 @@ def get_solicitudes_levantamiento():
         """)
         
         # Ejecutar la consulta usando SQLAlchemy
-        result = db.session.execute(query)
+        result = db.session.execute(query, {"sedexescuela": sedexescuela})
         
         # Convertir resultados a una lista de diccionarios
         resultado = []
@@ -701,6 +701,65 @@ def denegar_solicitud(id_solicitud):
             "status": "error",
             "message": f"Error al denegar la solicitud: {str(e)}"
         }), 500
+
+
+###INCLUSIONES
+@app.route('/api/solicitudes/inclusiones/<sedexescuela>', methods=['GET'])
+@cross_origin()
+def get_solicitudes_inclusiones(sedexescuela):
+    """
+    Obtiene la lista de cursos con sus solicitudes de levantamiento
+    agrupados por curso y grupo
+    """
+    try:
+        # Utilizamos SQLAlchemy (db) en lugar de una conexión directa
+        query = text("""
+        SELECT 
+            c.codigo_curso, 
+            c.nombre as nombre, 
+            c.creditos, 
+            g.id_grupo, 
+            COUNT(s.id_solicitud) as total_solicitudes
+        FROM 
+            public."Curso" c  
+        INNER JOIN 
+            "Grupo" g ON g.codigo_curso = c.codigo_curso 
+        LEFT JOIN 
+            "Solicitudes" s ON s.id_grupo = g.id_grupo
+        WHERE 
+            'Inclusion' = ANY(s.tipo_solicitud) and g."id_sedeXescuela" = 17
+        GROUP BY 
+            c.codigo_curso, c.nombre, c.creditos, g.id_grupo
+        ORDER BY
+            c.codigo_curso
+        """)
+        
+        # Ejecutar la consulta usando SQLAlchemy
+        result = db.session.execute(query, {"sedexescuela": sedexescuela})
+        
+        # Convertir resultados a una lista de diccionarios
+        resultado = []
+        for row in result:
+            resultado.append({
+                "codigo": row.codigo_curso,
+                "nombre": row.nombre,
+                "creditos": row.creditos,
+                "grupo": row.id_grupo,
+                "solicitudes": int(row.total_solicitudes)
+            })
+        
+        return jsonify({
+            "status": "success",
+            "data": resultado,
+            "message": "Datos de solicitudes de levantamiento obtenidos correctamente"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Error al obtener las solicitudes: {str(e)}"
+        }), 500
+
 
 # Ejecutar la aplicación
 if __name__ == '__main__':
