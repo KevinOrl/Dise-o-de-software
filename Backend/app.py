@@ -102,6 +102,32 @@ def listar_sedes():
             'message': f'Error al listar sedes: {str(e)}'
         }), 500
 
+# Endpoint para listar carreras
+@app.route('/api/carreras', methods=['GET'])
+def listar_carreras():
+    try:
+        resultado = db.session.execute(text('SELECT id_carrera, nombre FROM "Carrera"'))
+
+        carreras = []
+        for fila in resultado:
+            nombre_valor = fila.nombre[0] if fila.nombre else None
+            carreras.append({
+                'id_carrera': fila.id_carrera,
+                'nombre': nombre_valor
+            })
+
+        return jsonify({
+            'status': 'success',
+            'carreras': carreras
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Error al listar carreras: {str(e)}'
+        }), 500
+
+
 # Endpoint para autenticación de usuarios
 @app.route('/api/auth/login', methods=['POST'])
 def login():

@@ -47,7 +47,8 @@ const MainPage = () => {
     { label: 'Código de PIN', action: () => setVistaActual('') },
     { label: 'Historial Solicitudes', action: () => setVistaActual('solicitudes') },
     { label: 'Historial Retiro de cursos', action: () => setVistaActual('retiros') },
-    { label: 'Ayuda', action: () => setVistaActual('') }
+    { label: 'Ayuda', action: () => setVistaActual('') },
+    { label: 'Formulario de Inclusión', action: () => setVistaActual('inclusion') }
   ];
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -116,6 +117,7 @@ const MainPage = () => {
         {vistaActual === 'solicitudes' && userData && (<HistorialSolicitudes idEstudiante={idEstudiante} />)}
         {vistaActual === 'retiros' && userData && (<HistorialRetiros idEstudiante={idEstudiante} />)}
         {vistaActual === 'matriculas' && userData && (<MatriculasDisponibles idEstudiante={idEstudiante} />)}
+        {vistaActual === 'inclusion' && <FormularioInclusion />}
         {!vistaActual && (
           <h2 className="text-xl font-semibold text-gray-400">Sistema de monitoreo</h2>
         )}
