@@ -1,0 +1,838 @@
+.encabezado-detalle {
+  padding: 20px;
+  background-color: #e6eef7;
+  border-bottom: 1px solid #d1e0ef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.encabezado-detalle h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #0c2d55;
+}
+
+.estado-info {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+.estado-pendiente {
+  background-color: #fff8e1;
+  color: #f9a825;
+}
+
+.estado-revision {
+  background-color: #e8f4fd;
+  color: #0277bd;
+}
+
+.estado-aprobada {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.estado-denegada {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.prioridad-alta {
+  background-color: #ffecd2;
+  color: #ff7800;
+}
+
+.prioridad-media {
+  background-color: #e3f1e4;
+  color: #388e3c;
+}
+
+.prioridad-baja {
+  background-color: #e6e6e6;
+  color: #666;
+}
+
+.revisado-si {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.revisado-no {
+  background-color: #f5f5f5;
+  color: #757575;
+}
+
+.detalle-solicitud-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.seccion-detalle {
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.seccion-completa {
+  grid-column: 1 / -1;
+}
+
+.seccion-detalle h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.2rem;
+  color: #0c2d55;
+  border-bottom: 1px solid #eaeaea;
+  padding-bottom: 10px;
+}
+
+.seccion-detalle h3 {
+  font-size: 1.1rem;
+  margin: 16px 0 8px;
+  color: #333;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px 24px;
+}
+
+.info-item {
+  margin-bottom: 8px;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  margin-right: 8px;
+  display: block;
+}
+
+.info-valor {
+  color: #333;
+}
+
+.motivo-container {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.motivo-container p {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.documentos-container {
+  margin: 20px 0;
+}
+
+.documentos-lista {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.documento-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.icono-documento {
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+.comentario-container {
+  margin-top: 24px;
+}
+
+.label-comentario {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.comentario-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.comentario-textarea:focus {
+  border-color: #0c2d55;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(12, 45, 85, 0.1);
+}
+
+.botones-accion {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-aprobar, .btn-denegar, .btn-revisar {
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-aprobar {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-aprobar:hover:not(:disabled) {
+  background-color: #3d8b40;
+}
+
+.btn-denegar {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-denegar:hover:not(:disabled) {
+  background-color: #d32f2f;
+}
+
+.btn-revisar {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-revisar:hover:not(:disabled) {
+  background-color: #1976d2;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.mensaje {
+  padding: 15px;
+  margin: 0 20px 15px;
+  border-radius: 4px;
+}
+
+.mensaje.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
+}
+
+.mensaje.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+}
+
+.mensaje-revision {
+  background-color: #fff3e0;
+  padding: 12px;
+  border-radius: 4px;
+  color: #e65100;
+  margin-bottom: 0;
+}
+
+.requisitos-lista {
+  padding-left: 20px;
+  margin: 0;
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+:focus {
+  outline: 2px solid #4d90fe;
+  outline-offset: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .encabezado-detalle {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .estado-info {
+    margin-top: 10px;
+  }
+  
+  .detalle-solicitud-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .botones-accion {
+    flex-direction: column;
+  }
+}
+
+.dashboard-content {
+  padding-bottom: 20px;
+  background-color: #f5f7f9;
+  min-height: calc(100vh - 130px);
+}
+
+.breadcrumb-container {
+  padding: 12px 20px;
+  background-color: #e6eef7;
+  border-bottom: 1px solid #d1e0ef;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.volver-btn {
+  background: none;
+  border: none;
+  color: #0c2d55;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px 0;
+  font-size: 0.9rem;
+}
+
+.volver-icono {
+  margin-right: 5px;
+  font-weight: bold;
+}
+
+.solicitud-layout {
+  display: flex;
+  min-height: calc(100vh - 180px);
+}
+
+.panel-izquierdo {
+  width: 200px;
+  background-color: #e6eef7;
+  padding: 20px;
+}
+
+.panel-principal {
+  flex: 1;
+  padding: 20px;
+}
+
+.solicitud-titulo {
+  color: #0c2d55;
+  font-size: 1.5rem;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.seccion-info {
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.seccion-info h3 {
+  color: #0c2d55;
+  font-size: 1.1rem;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e6eef7;
+}
+
+.seccion-info h4 {
+  color: #0c2d55;
+  font-size: 1rem;
+  margin: 20px 0 10px 0;
+}
+
+.info-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.info-grupo {
+  flex: 0 0 50%;
+  padding: 0 15px;
+  margin-bottom: 10px;
+}
+
+.info-row {
+  margin-bottom: 12px;
+  display: flex;
+}
+
+.info-row-full {
+  flex: 0 0 100%;
+  padding: 0 15px;
+  margin-bottom: 12px;
+  display: flex;
+}
+
+.info-label {
+  flex: 0 0 100px;
+  font-weight: 600;
+  color: #555555;
+  padding-right: 10px;
+}
+
+.info-valor {
+  flex: 1;
+  color: #333333;
+}
+
+.motivo-container, .descripcion-container {
+  margin-bottom: 15px;
+}
+
+.motivo-texto {
+  margin-top: 5px;
+  font-weight: 500;
+}
+
+.descripcion-texto {
+  margin-top: 5px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  white-space: pre-line;
+}
+
+.documentos-container {
+  margin-top: 20px;
+}
+
+.documentos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.documento-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  border: 1px solid #eaeaea;
+}
+
+.icono-documento {
+  margin-right: 8px;
+}
+
+.comentarios-container {
+  margin-top: 25px;
+  padding-top: 15px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.comentario-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin: 8px 0 15px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.comentario-readonly {
+  margin: 10px 0;
+  padding: 15px;
+  background-color: #f0f4f8;
+  border-radius: 4px;
+  color: #333;
+}
+
+.botones-accion {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-aprobar, .btn-denegar, .btn-revisar {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.btn-aprobar {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-aprobar:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.btn-denegar {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-denegar:hover:not(:disabled) {
+  background-color: #e53935;
+}
+
+.btn-revisar {
+  background-color: #2196f3;
+  color: white;
+}
+
+.btn-revisar:hover:not(:disabled) {
+  background-color: #1e88e5;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.mensaje-alerta {
+  padding: 12px 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.mensaje-alerta.success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-left: 4px solid #2e7d32;
+}
+
+.mensaje-alerta.error {
+  background-color: #ffebee;
+  color: #c62828;
+  border-left: 4px solid #c62828;
+}
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.revisado {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.no-revisado {
+  background-color: #fff8e1;
+  color: #f57c00;
+}
+
+.estado-aprobada {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.estado-denegada {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.estado-pendiente {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.mensaje-espera {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #fff3e0;
+  border-left: 4px solid #ff9800;
+  border-radius: 4px;
+  color: #e65100;
+  font-size: 0.9rem;
+}
+
+.requisitos-lista {
+  list-style-type: disc;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.requisitos-lista li {
+  margin-bottom: 5px;
+}
+
+/* Accesibilidad WCAG 2.2 */
+:focus-visible {
+  outline: 3px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Para usuarios que prefieren movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Mejoras de contraste */
+.info-label {
+  color: #444;
+}
+
+/* Mejoras responsive */
+@media (max-width: 768px) {
+  .solicitud-layout {
+    flex-direction: column;
+  }
+  
+  .panel-izquierdo {
+    width: 100%;
+    padding: 15px 20px;
+  }
+  
+  .info-grid {
+    flex-direction: column;
+  }
+  
+  .info-grupo {
+    flex: 0 0 100%;
+  }
+  
+  .botones-accion {
+    flex-direction: column;
+  }
+  
+  .botones-accion button {
+    width: 100%;
+  }
+}
+
+/* Lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.loading-spinner:before {
+  content: "";
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #0c2d55;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Añadir al final del archivo CSS existente */
+
+/* Estilos para los modales de confirmación */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.modal-header {
+  color: white;
+  padding: 15px;
+  text-align: center;
+  position: relative;
+}
+
+.modal-header.rechazado {
+  background-color: #d32f2f;
+}
+
+.modal-header.aprobado {
+  background-color: #388e3c;
+}
+
+.modal-header.confirmacion-rechazo {
+  background-color: #0c2d55;
+}
+
+.modal-header.confirmacion-aprobacion {
+  background-color: #0c2d55;
+}
+
+.modal-titulo {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-titulo span {
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+.modal-body {
+  padding: 20px 15px;
+}
+
+.modal-body p {
+  margin: 0;
+  text-align: center;
+}
+
+.modal-footer {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-cancelar, .btn-confirmar-denegar, .btn-confirmar-aprobar, .btn-aceptar {
+  padding: 8px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  min-width: 100px;
+  transition: background-color 0.2s;
+}
+
+.btn-cancelar {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.btn-cancelar:hover {
+  background-color: #d5d5d5;
+}
+
+.btn-confirmar-denegar {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-confirmar-denegar:hover {
+  background-color: #d32f2f;
+}
+
+.btn-confirmar-aprobar {
+  background-color: #4caf50;
+  color: white;
+}
+
+.btn-confirmar-aprobar:hover {
+  background-color: #388e3c;
+}
+
+.btn-aceptar {
+  background-color: #e0e0e0;
+  color: #333;
+  min-width: 120px;
+}
+
+.btn-aceptar:hover {
+  background-color: #d5d5d5;
+}
+
+.modal-body.confirmacion {
+  padding: 30px 15px;
+}
+
+.texto-centrado {
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.modal-footer.confirmacion {
+  justify-content: center;
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .modal-backdrop, .modal-contenido {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Mejorar la accesibilidad con enfoque visible */
+.btn-cancelar:focus,
+.btn-confirmar-denegar:focus,
+.btn-confirmar-aprobar:focus,
+.btn-aceptar:focus {
+  outline: 3px solid #2196f3;
+  outline-offset: 2px;
+}

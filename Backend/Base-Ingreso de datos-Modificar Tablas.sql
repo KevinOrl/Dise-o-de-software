@@ -1474,3 +1474,98 @@ VALUES (
     1,   -- Departamento de Admisión y Registro (id=1)
     ARRAY['ASISTENTE']
 );
+
+
+select * from public."Curso" c  inner join "Grupo" g on g.codigo_curso  = c.codigo_curso where c.codigo_curso = 'IC7900'
+
+
+
+-- Inserción de solicitudes de levantamiento para cursos de computación
+-- Nota: Asegúrate de que los IDs de estudiantes y grupos existan en tus tablas
+
+-- Solicitud de levantamiento para Bases de Datos II
+INSERT INTO public."Solicitudes" (
+    id_solicitud,
+    id_estudiante,
+    id_grupo,
+    tipo_solicitud,
+    "fechaSolicitud",
+    revisado,
+    estado,
+    motivo
+) VALUES (
+    1,                       -- ID de solicitud único
+    1,                       -- ID del estudiante (ajustar según tus datos)
+    50,                        -- ID del grupo de Bases de Datos II (ajustar según tus datos)
+    '{"Levantamiento"}',        -- Tipo de solicitud como array
+    '2025-05-20',               -- Fecha actual
+    false,                      -- No revisado aún
+    '{"Pendiente"}',            -- Estado como array
+    '{"Necesito el curso para poder graduarme este semestre y ya he aprobado todos los requisitos."}'
+),(
+    2,                       -- ID de solicitud único
+    1,                       -- ID del estudiante (ajustar según tus datos)
+    52,                        -- ID del grupo de Requerimientos (ajustar según tus datos)
+    '{"Levantamiento"}',        -- Tipo de solicitud como array
+    '2025-05-21',               -- Fecha actual
+    false,                      -- No revisado aún
+    '{"Pendiente"}',            -- Estado como array
+    '{"El curso es un requisito para poder llevar otros cursos el próximo semestre y mantener mi plan de estudios."}'
+),(
+    3,                       -- ID de solicitud único
+    1,                       -- ID del estudiante (ajustar según tus datos)
+    86,                        -- ID del grupo de Análisis de Algoritmos (ajustar según tus datos)
+    '{"Levantamiento"}',        -- Tipo de solicitud como array
+    '2025-05-22',               -- Fecha actual
+    false,                      -- No revisado aún
+    '{"Pendiente"}',            -- Estado como array
+    '{"Solicito el levantamiento de este curso porque ya aprobé todos los requisitos y necesito llevarlo para continuar con mi malla curricular."}'
+)
+
+
+SELECT 
+    c.codigo_curso, 
+    c.nombre, 
+    c.creditos, 
+    g.id_grupo, 
+    COUNT(s.id_solicitud) as total_solicitudes
+FROM 
+    public."Curso" c  
+INNER JOIN 
+    "Grupo" g ON g.codigo_curso = c.codigo_curso 
+LEFT JOIN 
+    "Solicitudes" s ON s.id_grupo = g.id_grupo
+WHERE 
+    'Levantamiento' = ANY(s.tipo_solicitud)
+GROUP BY 
+    c.codigo_curso, c.nombre, c.creditos, g.id_grupo
+ORDER BY
+    c.codigo_curso;
+
+
+-- 1. Agregar una columna escalar en Persona para almacenar la identificación principal
+ALTER TABLE public."Persona" 
+ADD COLUMN id_persona_escalar character varying(20);
+
+-- 2. Llenar esta columna con el primer elemento del array de identificación
+UPDATE public."Persona"
+SET id_persona_escalar = (identificacion[1]);
+
+-- 3. Crear índice único para esta columna
+CREATE UNIQUE INDEX idx_persona_id_escalar ON public."Persona" (id_persona_escalar);
+
+-- 4. Añadir columnas escalares (NO arrays) a Estudiante y Administrativo
+ALTER TABLE public."Estudiante"
+ADD COLUMN id_persona_fk character varying(20);
+
+ALTER TABLE public."Administrativo"
+ADD COLUMN id_persona_fk character varying(20);
+
+-- 5. Crear las claves foráneas usando columnas escalares
+ALTER TABLE ONLY public."Estudiante"
+    ADD CONSTRAINT "FK_estudiante_persona" FOREIGN KEY (id_persona_fk) 
+    REFERENCES public."Persona" (id_persona_escalar);
+
+ALTER TABLE ONLY public."Administrativo"
+    ADD CONSTRAINT "FK_administrativo_persona" FOREIGN KEY (id_persona_fk) 
+    REFERENCES public."Persona" (id_persona_escalar);

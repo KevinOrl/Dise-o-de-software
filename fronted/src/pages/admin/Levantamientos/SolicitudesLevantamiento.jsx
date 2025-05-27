@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-// Corregir la importación del NavBar
 import NavBar from '../NavBar';
 import './SolicitudesLevantamiento.css';
 import logoTec from '../../../assets/images/logo-tec-white.png';
+import axios from 'axios'; // Asegúrate de tener axios instalado: npm install axios
 
 const SolicitudesLevantamiento = () => {
   // Estados para manejar los datos y la paginación
@@ -13,24 +13,29 @@ const SolicitudesLevantamiento = () => {
   const [error, setError] = useState(null);
 
   const ITEMS_PER_PAGE = 5; // Número de cursos por página
+  const API_URL = 'http://localhost:5000'; // Ajusta según la URL de tu backend
 
-  // Datos de prueba - En producción vendrían de una API
+  // Cargar datos desde la API
   useEffect(() => {
-    // Simular carga de datos
-    setLoading(true);
-    
-    setTimeout(() => {
-      // Datos de ejemplo basados en la imagen
-      const datosEjemplo = [
-        { codigo: 'IC2101', nombre: 'Programación Orientada a Objetos', creditos: 4, grupo: 1, solicitudes: 3 },
-        { codigo: 'IC2001', nombre: 'Estructuras de Datos', creditos: 4, grupo: 2, solicitudes: 5 },
-        { codigo: 'IC3002', nombre: 'Análisis de Algoritmos', creditos: 4, grupo: 1, solicitudes: 2 },
-        { codigo: 'IC4301', nombre: 'Bases de Datos I', creditos: 4, grupo: 3, solicitudes: 8 },
-        { codigo: 'IC7602', nombre: 'Redes', creditos: 3, grupo: 1, solicitudes: 4 },
-      ];
-      setCursos(datosEjemplo);
-      setLoading(false);
-    }, 600);
+    const fetchSolicitudes = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${API_URL}/api/solicitudes/levantamiento`);
+        
+        if (response.data.status === 'success') {
+          setCursos(response.data.data);
+        } else {
+          setError('Error al cargar los datos: ' + response.data.message);
+        }
+      } catch (err) {
+        setError('Error de conexión con el servidor: ' + (err.message || 'Error desconocido'));
+        console.error('Error al cargar solicitudes:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSolicitudes();
   }, []);
 
   // Función para cambiar de página
@@ -80,7 +85,6 @@ const SolicitudesLevantamiento = () => {
                         <td colSpan="6" className="no-data-message">No hay solicitudes de levantamiento disponibles</td>
                       </tr>
                     ) : (
-                      // Filtrar cursos según la página actual
                       cursos
                         .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
                         .map((curso) => (
@@ -93,7 +97,7 @@ const SolicitudesLevantamiento = () => {
                             <td headers="col-acciones">
                               <button 
                                 className="ver-solicitudes-btn"
-                                onClick={() => {/* Implementar navegación a detalle */}}
+                                onClick={() => window.location.href = `/admin/solicitudes-levantamiento/${curso.codigo}/${curso.grupo}`}
                                 aria-label={`Ver solicitudes para ${curso.nombre} grupo ${curso.grupo}`}
                               >
                                 Ver solicitudes
