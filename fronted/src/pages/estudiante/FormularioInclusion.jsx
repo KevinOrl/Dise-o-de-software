@@ -2,28 +2,36 @@ import React, { useState } from 'react';
 import FormularioInclusionPg1 from './FormularioInclusionPg1';
 import FormularioInclusionPg2 from './FormularioInclusionPg2';
 
-const FormularioInclusiono = ({ onBack }) => {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({});
+const FormularioInclusion = ({ curso, onBack }) => {
+  const [pagina, setPagina] = useState(1);
+  const [formData, setFormData] = useState({
+    curso: curso?.codigo || '',
+    grupo: curso?.grupo || ''
+  });
 
-  const handleNext = () => setStep(2);
-  const handleBack = () => setStep(1);
+  const handleNext = () => setPagina(2);
+  const handleBack = () => {
+    if (pagina === 1) {
+      onBack(); // vuelve al listado
+    } else {
+      setPagina(1);
+    }
+  };
 
-  const handleSubmit = (finalData) => {
-    console.log('Solicitud completa:', finalData);
-    // Aquí puedes enviar el formData + finalData al backend
+  const handleSubmit = (datosFinales) => {
+    console.log('Datos a enviar:', datosFinales);
+    // Aquí puedes hacer POST al backend o redirigir
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {step === 1 && (
+    <div className="bg-white rounded shadow-md p-6">
+      {pagina === 1 ? (
         <FormularioInclusionPg1
+          onNext={handleNext}
           formData={formData}
           setFormData={setFormData}
-          onNext={handleNext}
         />
-      )}
-      {step === 2 && (
+      ) : (
         <FormularioInclusionPg2
           formData={formData}
           onBack={handleBack}
@@ -35,4 +43,5 @@ const FormularioInclusiono = ({ onBack }) => {
 };
 
 export default FormularioInclusion;
+
 

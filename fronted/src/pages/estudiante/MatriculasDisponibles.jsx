@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import FormularioInclusion from './FormularioInclusion';
 
 const MatriculasDisponibles = ({ idEstudiante }) => {
   const [tipoSeleccionado, setTipoSeleccionado] = useState('Semestre');
   const [cursos, setCursos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
 
   const fetchCursos = async (tipo) => {
     setLoading(true);
     try {
-      // Aquí se debería llamar a tu endpoint real según el tipo
       const tipoMap = {
         'Semestre': 'semestre',
         'Inclusiones': 'inclusion',
@@ -27,8 +29,18 @@ const MatriculasDisponibles = ({ idEstudiante }) => {
   };
 
   useEffect(() => {
+    setMostrarFormulario(false); // ocultar formulario al cambiar de pestaña
     fetchCursos(tipoSeleccionado);
   }, [tipoSeleccionado]);
+
+  const handleAbrirFormulario = (curso) => {
+    if (tipoSeleccionado === 'Inclusiones') {
+      setCursoSeleccionado(curso);
+      setMostrarFormulario(true);
+    } else {
+      alert('Esta funcionalidad está disponible solo para Inclusiones por ahora.');
+    }
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-12">
@@ -48,40 +60,48 @@ const MatriculasDisponibles = ({ idEstudiante }) => {
         ))}
       </div>
 
-      <table className="w-full border border-gray-300 text-sm bg-white shadow">
-        <thead className="bg-gray-100 text-left">
-          <tr>
-            <th className="px-4 py-2">Código</th>
-            <th className="px-4 py-2">Nombre</th>
-            <th className="px-4 py-2">Créditos</th>
-            <th className="px-4 py-2">Grupo</th>
-            <th className="px-4 py-2">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {loading ? (
-            <tr><td colSpan="5" className="text-center py-4">Cargando...</td></tr>
-          ) : cursos.length > 0 ? (
-            cursos.map((curso, index) => (
-              <tr key={index} className="border-t">
-                <td className="px-4 py-2">{curso.codigo}</td>
-                <td className="px-4 py-2">{curso.nombre}</td>
-                <td className="px-4 py-2">{curso.creditos}</td>
-                <td className="px-4 py-2">{curso.grupo}</td>
-                <td className="px-4 py-2">
-                  <button className="text-sm text-white bg-blue-600 px-2 py-1 rounded hover:bg-blue-700">
-                    Ver formulario
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
-            <tr><td colSpan="5" className="text-center py-4">No hay cursos disponibles</td></tr>
-          )}
-        </tbody>
-      </table>
+      {mostrarFormulario ? (
+        <FormularioInclusion curso={cursoSeleccionado} onBack={() => setMostrarFormulario(false)} />
+      ) : (
+        <table className="w-full border border-gray-300 text-sm bg-white shadow">
+          <thead className="bg-gray-100 text-left">
+            <tr>
+              <th className="px-4 py-2">Código</th>
+              <th className="px-4 py-2">Nombre</th>
+              <th className="px-4 py-2">Créditos</th>
+              <th className="px-4 py-2">Grupo</th>
+              <th className="px-4 py-2">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="5" className="text-center py-4">Cargando...</td></tr>
+            ) : cursos.length > 0 ? (
+              cursos.map((curso, index) => (
+                <tr key={index} className="border-t">
+                  <td className="px-4 py-2">{curso.codigo}</td>
+                  <td className="px-4 py-2">{curso.nombre}</td>
+                  <td className="px-4 py-2">{curso.creditos}</td>
+                  <td className="px-4 py-2">{curso.grupo}</td>
+                  <td className="px-4 py-2">
+                    <button
+                      onClick={() => handleAbrirFormulario(curso)}
+                      className="text-sm text-white bg-blue-600 px-2 py-1 rounded hover:bg-blue-700"
+                    >
+                      Ver formulario
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan="5" className="text-center py-4">No hay cursos disponibles</td></tr>
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };
 
 export default MatriculasDisponibles;
+
