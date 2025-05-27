@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCalendarAlt, FaFileAlt, FaSignOutAlt, FaUserCircle, FaChevronDown } from 'react-icons/fa';
+import HistorialSolicitudes from './HistorialSolicitudes';
+import HistorialRetiros from './HistorialRetiros';
 
 
 const MainPage = () => {
@@ -8,6 +10,7 @@ const MainPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [hora, setHora] = useState('');
   const [fecha, setFecha] = useState('');
+  const [vistaActual, setVistaActual] = useState('');
 
   useEffect(() => {
     const actualizarHoraYFecha = () => {
@@ -35,13 +38,13 @@ const MainPage = () => {
   };
 
   const opciones = [
-    'Matrículas Disponibles',
-    'Mi Historial Académico',
-    'Requisitos Pendientes',
-    'Código de PIN',
-    'Historial Solicitudes',
-    'Historial Retiro de cursos',
-    'Ayuda'
+    { label: 'Matrículas Disponibles', action: () => setVistaActual('') },
+    { label: 'Mi Historial Académico', action: () => setVistaActual('') },
+    { label: 'Requisitos Pendientes', action: () => setVistaActual('') },
+    { label: 'Código de PIN', action: () => setVistaActual('') },
+    { label: 'Historial Solicitudes', action: () => setVistaActual('solicitudes') },
+    { label: 'Historial Retiro de cursos', action: () => setVistaActual('retiros') },
+    { label: 'Ayuda', action: () => setVistaActual('') }
   ];
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -69,9 +72,13 @@ const MainPage = () => {
                 {opciones.map((op, index) => (
                   <div
                     key={index}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    onClick={() => {
+                      op.action();
+                      setMenuOpen(false);
+                    }}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
                   >
-                    {op}
+                    {op.label}
                   </div>
                 ))}
               </div>
@@ -103,9 +110,12 @@ const MainPage = () => {
       </header>
 
       <main className="flex-1 flex justify-center items-start p-10">
-        <h2 className="text-xl font-semibold text-gray-400">Sistema de monitoreo</h2>
+        {vistaActual === 'solicitudes' && <HistorialSolicitudes idEstudiante={1} />}
+        {vistaActual === 'retiros' && <HistorialRetiros idEstudiante={1} />}
+        {!vistaActual && (
+          <h2 className="text-xl font-semibold text-gray-400">Sistema de monitoreo</h2>
+        )}
       </main>
-
       <footer className="border-t border-gray-200 text-sm text-gray-500 p-4 flex justify-between items-center">
         <div className="flex items-center space-x-1">
           <span>✉️</span>

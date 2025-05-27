@@ -205,7 +205,6 @@ def login():
             'message': f'Error en autenticación: {str(e)}'
         }), 500
 
-
 ###LEVANTAMIENTOS ADMINISTRATIVOS
 ###
 ###
@@ -1209,6 +1208,53 @@ def denegar_solicitud_inclusion(id_solicitud):
             "status": "error",
             "message": f"Error al denegar la solicitud: {str(e)}"
         }), 500
+
+# Endpoint para obtener el historial de solicitudes de un estudiante
+@app.route('/api/historial-solicitudes/<int:id_estudiante>', methods=['GET'])
+def historial_solicitudes(id_estudiante):
+    try:
+        sql = text("""
+            SELECT id_historial_solicitud AS id_historial_solicitud, codigo_curso, "fechaRetiro", semestre, anio, id_solicitud
+            FROM "HistorialSolicitudes"
+            WHERE id_estudiante = :id
+            ORDER BY anio DESC, semestre DESC, "fechaRetiro" DESC
+        """)
+        resultado = db.session.execute(sql, {"id": id_estudiante})
+        historial = [{
+            "id_historial_solicitud": r.id_historial_solicitud,
+            "codigo_curso": r.codigo_curso,
+            "fechaRetiro": r.fechaRetiro,
+            "semestre": r.semestre,
+            "anio": r.anio,
+            "id_solicitud": r.id_solicitud
+        } for r in resultado]
+
+        return jsonify({"status": "success", "data": historial})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# Endpoint para obtener el historial de retiros de un estudiante
+@app.route('/api/historial-retiros/<int:id_estudiante>', methods=['GET'])
+def historial_retiros(id_estudiante):
+    try:
+        sql = text("""
+            SELECT id_retiro, codigo_curso, "fechaRetiro", semestre, anio
+            FROM "HistorialRetiros"
+            WHERE id_estudiante = :id
+            ORDER BY anio DESC, semestre DESC, "fechaRetiro" DESC
+        """)
+        resultado = db.session.execute(sql, {"id": id_estudiante})
+        historial = [{
+            "id_retiro": r.id_retiro,
+            "codigo_curso": r.codigo_curso,
+            "fechaRetiro": r.fechaRetiro,
+            "semestre": r.semestre,
+            "anio": r.anio
+        } for r in resultado]
+
+        return jsonify({"status": "success", "data": historial})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Ejecutar la aplicación
 if __name__ == '__main__':
