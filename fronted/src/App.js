@@ -8,6 +8,8 @@ import AdminDashboard from './pages/admin/Dashboard';
 import SolicitudesLevantamiento from './pages/admin/Levantamientos/SolicitudesLevantamiento';
 import DetalleSolicitudes from './pages/admin/Levantamientos/DetalleSolicitudes';
 import DetalleSolicitudIndividual from './pages/admin/Levantamientos/DetalleSolicitudIndividual';
+import MainPage from './pages/estudiante/MainPage';
+
 
 function App() {
   return (
@@ -16,6 +18,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/estudiante/dashboard" element={<EstudianteDashboard />} />
+        <Route path="/estudiante" element={<MainPage />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         
         {/* Rutas de administración */}
