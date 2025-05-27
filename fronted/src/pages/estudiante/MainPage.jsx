@@ -11,6 +11,9 @@ const MainPage = () => {
   const [hora, setHora] = useState('');
   const [fecha, setFecha] = useState('');
   const [vistaActual, setVistaActual] = useState('');
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const idEstudiante = userData?.id;
+
 
   useEffect(() => {
     const actualizarHoraYFecha = () => {
@@ -33,8 +36,8 @@ const MainPage = () => {
   }, []);
 
   const estudiante = {
-    nombre: 'Nombre del estudiante',
-    carnet: 'carnet'
+    nombre: userData?.nombre || 'Estudiante',
+    carnet: userData?.carnet || 'N/A'
   };
 
   const opciones = [
@@ -110,8 +113,8 @@ const MainPage = () => {
       </header>
 
       <main className="flex-1 flex justify-center items-start p-10">
-        {vistaActual === 'solicitudes' && <HistorialSolicitudes idEstudiante={1} />}
-        {vistaActual === 'retiros' && <HistorialRetiros idEstudiante={1} />}
+        {vistaActual === 'solicitudes' && userData && (<HistorialSolicitudes idEstudiante={idEstudiante} />)}
+        {vistaActual === 'retiros' && userData && (<HistorialRetiros idEstudiante={idEstudiante} />)}
         {!vistaActual && (
           <h2 className="text-xl font-semibold text-gray-400">Sistema de monitoreo</h2>
         )}

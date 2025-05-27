@@ -92,7 +92,7 @@ const Login = () => {
         
         // Redireccionar según el tipo de usuario
         if (response.data.userType === 'estudiante') {
-          navigate('/estudiante/dashboard');
+          navigate('/estudiante');
         } else if (response.data.userType === 'admin') {
           navigate('/admin/dashboard');
         }
