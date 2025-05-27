@@ -1256,6 +1256,68 @@ def historial_retiros(id_estudiante):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Endpoint para obtener los cursos disponibles según el tipo de matrícula
+@app.route('/api/matriculas/<tipo>', methods=['GET'])
+def cursos_disponibles(tipo):
+    try:
+        tipo = tipo.lower()
+        if tipo not in ['semestre', 'inclusion', 'levantamiento']:
+            return jsonify({
+                'status': 'error',
+                'message': 'Tipo de matrícula no válido.'
+            }), 400
+
+        # Armar la cláusula WHERE según el tipo
+        condicion_tipo = ""
+        if tipo == 'semestre':
+            condicion_tipo = "TRUE"  # Todos los grupos normales
+        else:
+            condicion_tipo = f"'{tipo.capitalize()}' = ANY(s.tipo_solicitud)"
+
+        # Consulta SQL dinámica
+        sql = text(f"""
+            SELECT 
+                c.codigo_curso,
+                c.nombre[1] AS nombre,
+                c.creditos,
+                g.id_grupo
+            FROM 
+                public."Curso" c
+            INNER JOIN 
+                "Grupo" g ON g.codigo_curso = c.codigo_curso
+            LEFT JOIN 
+                "Solicitudes" s ON s.id_grupo = g.id_grupo
+            WHERE 
+                {condicion_tipo}
+            GROUP BY 
+                c.codigo_curso, c.nombre, c.creditos, g.id_grupo
+            ORDER BY 
+                c.codigo_curso
+        """)
+
+        result = db.session.execute(sql)
+
+        cursos = []
+        for row in result:
+            cursos.append({
+                "codigo": row.codigo_curso,
+                "nombre": row.nombre,
+                "creditos": row.creditos,
+                "grupo": row.id_grupo
+            })
+
+        return jsonify({
+            "status": "success",
+            "data": cursos
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Error al obtener cursos disponibles: {str(e)}"
+        }), 500
+
+
 # Ejecutar la aplicación
 if __name__ == '__main__':
     app.run(debug=True)
