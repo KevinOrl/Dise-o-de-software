@@ -1721,8 +1721,28 @@ INSERT INTO public."Solicitudes" (id_solicitud, id_estudiante, id_grupo, tipo_so
 (8, 1, 111, ARRAY['Inclusion'], '2025-03-26', false, ARRAY['Pendiente'], ARRAY['Necesito llevar este curso'], NULL),
 (9, 1, 114, ARRAY['Levantamiento'], '2025-04-01', false, ARRAY['Pendiente'], ARRAY['No me quiero atrasar'], NULL);
 
-INSERT INTO public."HistorialSolicitudes" (id_historial_solicitud, id_estudiante, codigo_curso, fecha_retiro, semestre, año, id_solicitud) VALUES
+INSERT INTO public."HistorialSolicitudes" (id_historial_solicitud, id_estudiante, codigo_curso, "fechaRetiro", semestre, año, id_solicitud) VALUES
 (1, 1, 'IC7841', '2025-03-31', 1, 2025, 1),
 (2, 1, 'CI1107', '2025-03-26', 1, 2025, 2),
 (3, 1, 'IC1802', '2025-04-01', 1, 2025, 3);
+
+
+
+CREATE TABLE IF NOT EXISTS public."HistorialProcesos" (
+    id_historial SERIAL PRIMARY KEY,
+    fecha_accion TIMESTAMP NOT NULL DEFAULT NOW(),
+    accion VARCHAR(100) NOT NULL,
+    id_proceso INTEGER NOT NULL REFERENCES public."Procesos" (id_proceso) ON DELETE CASCADE,
+    id_admin INTEGER NOT NULL REFERENCES public."Administrativo" (id_admin) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_historial_proceso ON public."HistorialProcesos" (id_proceso);
+CREATE INDEX IF NOT EXISTS idx_historial_admin ON public."HistorialProcesos" (id_admin);
+CREATE INDEX IF NOT EXISTS idx_historial_fecha ON public."HistorialProcesos" (fecha_accion);
+
+COMMENT ON TABLE public."HistorialProcesos" IS 'Registra los cambios realizados en los procesos';
+
+insert into public."Procesos" (id_proceso, "tipoProceso", "fechaInicio", "fechaFinal", estado, "id_sedeXescuela", id_admin) values
+(1, ARRAY['Inclusion'], '2025-05-27', '2025-06-03', true, 17, 11),
+(2, ARRAY['Levantamiento'], '2025-05-27', '2025-06-03', true, 17, 11)
             
