@@ -18,34 +18,39 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
     setDatos((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async () => {
+    const handleSubmit = async () => {
     try {
-      const estudiante = JSON.parse(localStorage.getItem('userData'));
-      if (!estudiante?.id) {
+        const estudiante = JSON.parse(localStorage.getItem('userData'));
+        if (!estudiante?.id) {
         alert('No se pudo obtener el ID del estudiante.');
         return;
-      }
+        }
 
-      const payload = {
-        ...formData,
-        ...datos,
+        if (!formData.curso || !formData.grupo) {
+        alert('Faltan datos del curso o grupo.');
+        return;
+        }
+
+        const payload = {
         id_estudiante: estudiante.id,
-        tipo_solicitud: 'levantamiento'
-      };
+        id_grupo: formData.grupo,
+        codigo_curso: formData.curso,
+        motivo: datos.motivo
+        };
 
-      const response = await axios.post('http://localhost:5000/api/solicitudes/levantamiento', payload);
+        const response = await axios.post('http://localhost:5000/api/solicitudes/levantamiento', payload);
 
-      if (response.data.status === 'success') {
-        alert('✅ Solicitud enviada exitosamente');
+        if (response.data.status === 'success') {
+        alert('Solicitud enviada exitosamente');
         navigate('/estudiante');
-      } else {
-        alert('⚠️ Error al enviar solicitud');
-      }
+        } else {
+        alert('Error al enviar solicitud');
+        }
     } catch (err) {
-      console.error(err);
-      alert('🚫 Error al conectar con el servidor');
+        console.error(err);
+        alert('Error al conectar con el servidor');
     }
-  };
+    };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-100 rounded">
