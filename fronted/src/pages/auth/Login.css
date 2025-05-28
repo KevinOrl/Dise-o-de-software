@@ -142,10 +142,10 @@ h1 {
 input {
   width: 100%;
   padding: 0.75rem;
-  padding-left: 40px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 1rem;
+  height: 45px;
   background-color: white;
 }
 
@@ -281,6 +281,26 @@ input:focus {
 .copyright {
   color: #666;
   margin: 0 auto;
+}
+
+/* Estilo para el skip link */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #005085;
+  color: white;
+  padding: 8px 15px;
+  z-index: 100;
+  transition: top 0.3s;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #4d90fe;
 }
 
 /* Estilos responsivos */
