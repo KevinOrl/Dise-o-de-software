@@ -1883,6 +1883,80 @@ def registrar_solicitud_inclusion():
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# Endpoint para registrar una solicitud de levantamiento
+@app.route('/api/solicitudes/levantamiento', methods=['POST'])
+def registrar_solicitud_levantamiento():
+    try:
+        data = request.get_json()
+
+        # Datos mínimos requeridos
+        id_estudiante = data.get('id_estudiante')
+        id_grupo = data.get('id_grupo')
+        motivo = data.get('motivo')
+        codigo_curso = data.get('codigo_curso')
+
+        if not all([id_estudiante, id_grupo, motivo, codigo_curso]):
+            return jsonify({"status": "error", "message": "Faltan datos obligatorios"}), 400
+
+        hoy = date.today()
+        anio = hoy.year
+        semestre = 1 if hoy.month < 7 or (hoy.month == 7 and hoy.day <= 10) else 2
+
+        # Obtener el siguiente id_solicitud
+        next_id_query = text("SELECT COALESCE(MAX(id_solicitud), 0) + 1 AS next_id FROM \"Solicitudes\"")
+        next_id_result = db.session.execute(next_id_query).fetchone()
+        new_id_solicitud = next_id_result.next_id
+
+        # Insertar en la tabla Solicitudes
+        insert_solicitud = text("""
+            INSERT INTO "Solicitudes" (
+                id_solicitud, id_estudiante, id_grupo, tipo_solicitud,
+                "fechaSolicitud", revisado, estado, motivo, comentario_admin
+            ) VALUES (
+                :id_solicitud, :id_estudiante, :id_grupo, ARRAY['Levantamiento'],
+                :fecha, false, ARRAY['Pendiente'], ARRAY[:motivo], NULL
+            )
+        """)
+        db.session.execute(insert_solicitud, {
+            'id_solicitud': new_id_solicitud,
+            'id_estudiante': id_estudiante,
+            'id_grupo': id_grupo,
+            'fecha': hoy.isoformat(),
+            'motivo': motivo
+        })
+
+        # Obtener el siguiente id_historial
+        next_hist_query = text("SELECT COALESCE(MAX(id_historial_solicitud), 0) + 1 AS next_id FROM \"HistorialSolicitudes\"")
+        next_hist_result = db.session.execute(next_hist_query).fetchone()
+        new_id_historial = next_hist_result.next_id
+
+        # Insertar en la tabla HistorialSolicitudes
+        insert_historial = text("""
+            INSERT INTO "HistorialSolicitudes" (
+                id_historial_solicitud, id_estudiante, codigo_curso,
+                "fechaRetiro", semestre, anio, id_solicitud
+            ) VALUES (
+                :id_historial, :id_estudiante, :codigo_curso,
+                :fecha, :semestre, :anio, :id_solicitud
+            )
+        """)
+        db.session.execute(insert_historial, {
+            'id_historial': new_id_historial,
+            'id_estudiante': id_estudiante,
+            'codigo_curso': codigo_curso,
+            'fecha': hoy.isoformat(),
+            'semestre': semestre,
+            'anio': anio,
+            'id_solicitud': new_id_solicitud
+        })
+
+        db.session.commit()
+
+        return jsonify({"status": "success", "message": "Solicitud registrada correctamente"})
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 # Ejecutar la aplicación
 if __name__ == '__main__':

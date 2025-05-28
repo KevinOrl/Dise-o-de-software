@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import FormularioInclusion from './FormularioInclusion';
+import FormularioLevantamiento from './FormularioLevantamiento';
+
 
 const MatriculasDisponibles = ({ idEstudiante }) => {
   const [tipoSeleccionado, setTipoSeleccionado] = useState('Semestre');
@@ -34,12 +36,8 @@ const MatriculasDisponibles = ({ idEstudiante }) => {
   }, [tipoSeleccionado]);
 
   const handleAbrirFormulario = (curso) => {
-    if (tipoSeleccionado === 'Inclusiones') {
-      setCursoSeleccionado(curso);
-      setMostrarFormulario(true);
-    } else {
-      alert('Esta funcionalidad está disponible solo para Inclusiones por ahora.');
-    }
+    setCursoSeleccionado(curso);
+    setMostrarFormulario(true);
   };
 
   return (
@@ -61,7 +59,13 @@ const MatriculasDisponibles = ({ idEstudiante }) => {
       </div>
 
       {mostrarFormulario ? (
-        <FormularioInclusion curso={cursoSeleccionado} onBack={() => setMostrarFormulario(false)} />
+        tipoSeleccionado === 'Inclusiones' ? (
+          <FormularioInclusion curso={cursoSeleccionado} onBack={() => setMostrarFormulario(false)} />
+        ) : tipoSeleccionado === 'Levantamientos' ? (
+          <FormularioLevantamiento curso={cursoSeleccionado} onBack={() => setMostrarFormulario(false)} />
+        ) : (
+          <div className="text-center py-10">Este tipo de matrícula aún no está disponible.</div>
+        )
       ) : (
         <table className="w-full border border-gray-300 text-sm bg-white shadow">
           <thead className="bg-gray-100 text-left">
