@@ -43,8 +43,6 @@ const MainPage = () => {
   const opciones = [
     { label: 'Matrículas Disponibles', action: () => setVistaActual('matriculas') },
     { label: 'Mi Historial Académico', action: () => setVistaActual('') },
-    { label: 'Requisitos Pendientes', action: () => setVistaActual('') },
-    { label: 'Código de PIN', action: () => setVistaActual('') },
     { label: 'Historial Solicitudes', action: () => setVistaActual('solicitudes') },
     { label: 'Historial Retiro de cursos', action: () => setVistaActual('retiros') },
     { label: 'Ayuda', action: () => setVistaActual('') },
