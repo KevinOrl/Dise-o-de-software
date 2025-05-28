@@ -1766,7 +1766,7 @@ def actualizar_fechas_proceso(id_proceso):
                     success, sent_count, error_count = send_email_notification(correos, subject, message)
                     
                     # Registrar en historial con detalles del envío
-                    accion_texto = f"Modificación de fechas con notificación a estudiantes ({sent_count} enviados, {error_count} fallidos)"
+                    accion_texto = f"Modificación de fechas con notificación a estudiantes (correos {sent_count} enviados, {error_count} fallidos)"
                 else:
                     # No se encontraron correos de estudiantes
                     accion_texto = "Modificación de fechas (no se encontraron correos para notificar)"

@@ -10,6 +10,8 @@ const HabilitarProcesos = () => {
     Inclusion: null,
     Levantamiento: null
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -163,6 +165,14 @@ const HabilitarProcesos = () => {
     }
   };
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = historial.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(historial.length / itemsPerPage);
+
+    // Función para cambiar de página
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <div className="dashboard-container">
       <NavBar />
@@ -285,10 +295,10 @@ const HabilitarProcesos = () => {
                   <tbody>
                     {historial.length === 0 ? (
                       <tr>
-                        <td colSpan="4" className="no-data-message">No hay registros de cambios</td>
+                        <td colSpan="5" className="no-data-message">No hay registros de cambios</td>
                       </tr>
                     ) : (
-                      historial.map((item, index) => (
+                      currentItems.map((item, index) => (
                         <tr key={index}>
                           <td>{item.fecha}</td>
                           <td>{item.usuario}</td>
@@ -300,6 +310,41 @@ const HabilitarProcesos = () => {
                     )}
                   </tbody>
                 </table>
+
+                {/* Paginación */}
+                {historial.length > 0 && (
+                  <div className="pagination" role="navigation" aria-label="Paginación de resultados">
+                    <button 
+                      className={`pagination-btn prev ${currentPage === 1 ? 'disabled' : ''}`}
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      aria-label="Página anterior"
+                    >
+                      &lt;
+                    </button>
+                    
+                    {Array.from({ length: totalPages }, (_, index) => (
+                      <button 
+                        key={index + 1}
+                        className={`pagination-btn ${currentPage === index + 1 ? 'active' : ''}`}
+                        onClick={() => paginate(index + 1)}
+                        aria-label={`Ir a página ${index + 1}`}
+                        aria-current={currentPage === index + 1 ? "page" : undefined}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+                    
+                    <button 
+                      className={`pagination-btn next ${currentPage === totalPages ? 'disabled' : ''}`}
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      aria-label="Página siguiente"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                )}
               </section>
             </>
           )}

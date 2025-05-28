@@ -275,20 +275,51 @@ button:disabled {
   line-height: 1.4;
 }
 
-/* Accesibilidad WCAG 2.2 */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
-  }
+/* Estilos para la paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 8px;
 }
 
-:focus-visible {
-  outline: 3px solid #4a90e2;
-  outline-offset: 2px;
+.pagination-btn {
+  padding: 6px 12px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Mejoras responsive */
+.pagination-btn.active {
+  background-color: #005085;
+  color: white;
+  border-color: #005085;
+}
+
+.pagination-btn:hover:not(.disabled):not(.active) {
+  background-color: #e0e0e0;
+}
+
+.pagination-btn.disabled {
+  background-color: #f7f7f7;
+  color: #aaa;
+  border-color: #eee;
+  cursor: not-allowed;
+}
+
+.pagination-btn.prev,
+.pagination-btn.next {
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .procesos-grid {
     grid-template-columns: 1fr;
@@ -297,6 +328,15 @@ button:disabled {
   .modal-contenido {
     max-width: 90%;
     margin: 0 15px;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+  }
+  
+  .pagination-btn {
+    min-width: 30px;
+    padding: 5px;
   }
 }
 
@@ -318,4 +358,17 @@ button:disabled {
   justify-content: center;
   align-items: center;
   padding: 30px 0;
+}
+
+/* Accesibilidad WCAG 2.2 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+:focus-visible {
+  outline: 3px solid #4a90e2;
+  outline-offset: 2px;
 }
