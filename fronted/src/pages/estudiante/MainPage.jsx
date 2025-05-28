@@ -4,6 +4,7 @@ import { FaCalendarAlt, FaFileAlt, FaSignOutAlt, FaUserCircle, FaChevronDown } f
 import HistorialSolicitudes from './HistorialSolicitudes';
 import HistorialRetiros from './HistorialRetiros';
 import MatriculasDisponibles from './MatriculasDisponibles';
+import FormularioInclusion from './FormularioInclusion';
 
 const MainPage = () => {
   const navigate = useNavigate();

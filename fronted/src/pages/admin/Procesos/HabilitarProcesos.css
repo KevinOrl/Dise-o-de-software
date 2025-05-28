@@ -241,6 +241,40 @@ button:disabled {
   cursor: pointer;
 }
 
+/* Estilos para el checkbox y su contenedor */
+.checkbox-container {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eaeaea;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  height: auto;
+  margin-right: 10px;
+}
+
+.checkbox-group label {
+  display: inline;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-description {
+  margin: 0;
+  padding-left: 24px;
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
 /* Accesibilidad WCAG 2.2 */
 @media (prefers-reduced-motion: reduce) {
   * {

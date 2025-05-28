@@ -17,7 +17,8 @@ const HabilitarProcesos = () => {
   const [procesoActual, setProcesoActual] = useState(null);
   const [nuevasFechas, setNuevasFechas] = useState({
     fechaInicio: '',
-    fechaFinal: ''
+    fechaFinal: '',
+    notificarEstudiantes: false // Nueva propiedad para el checkbox
   });
 
   // Obtener datos del usuario
@@ -93,17 +94,26 @@ const HabilitarProcesos = () => {
       
     setNuevasFechas({
       fechaInicio,
-      fechaFinal
+      fechaFinal,
+      notificarEstudiantes: false // Iniciar siempre con la opción desmarcada
     });
     
     setModalVisible(true);
   };
 
   const handleFechaChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setNuevasFechas(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { checked } = e.target;
+    setNuevasFechas(prev => ({
+      ...prev,
+      notificarEstudiantes: checked
     }));
   };
 
@@ -124,10 +134,18 @@ const HabilitarProcesos = () => {
       const response = await axios.put(`${API_URL}/api/procesos/${procesoActual.id}/fechas`, {
         fechaInicio: nuevasFechas.fechaInicio,
         fechaFinal: nuevasFechas.fechaFinal,
+        notificarEstudiantes: nuevasFechas.notificarEstudiantes, // Enviar la opción al backend
         id_admin: userData.id
       });
       
       if (response.data.status === 'success') {
+        // Mensaje personalizado según si se envió notificación o no
+        if (nuevasFechas.notificarEstudiantes) {
+          alert('Fechas actualizadas y notificación enviada a los estudiantes');
+        } else {
+          alert('Fechas actualizadas correctamente');
+        }
+        
         // Cerrar modal
         setModalVisible(false);
         
@@ -330,6 +348,25 @@ const HabilitarProcesos = () => {
                   required
                   aria-required="true"
                 />
+              </div>
+              
+              {/* Nuevo checkbox para notificación a estudiantes */}
+              <div className="form-group checkbox-container">
+                <div className="checkbox-group">
+                  <input
+                    type="checkbox"
+                    id="notificarEstudiantes"
+                    name="notificarEstudiantes"
+                    checked={nuevasFechas.notificarEstudiantes}
+                    onChange={handleFechaChange}
+                  />
+                  <label htmlFor="notificarEstudiantes">
+                    Notificar a estudiantes sobre este cambio
+                  </label>
+                </div>
+                <p className="checkbox-description">
+                  Se enviará un correo electrónico a todos los estudiantes informando sobre el cambio en las fechas del proceso.
+                </p>
               </div>
               
               <div className="modal-footer">

@@ -5,7 +5,10 @@ from flask_cors import CORS, cross_origin
 import os
 from dotenv import load_dotenv
 from sqlalchemy import text
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 # Cargar variables de entorno
 load_dotenv()
@@ -1550,6 +1553,69 @@ def toggle_proceso(id_proceso):
             "message": f"Error al modificar el estado del proceso: {str(e)}"
         }), 500
 
+def format_date(iso_date):
+    """Convierte una fecha ISO a formato legible"""
+    try:
+        date_obj = datetime.strptime(iso_date, '%Y-%m-%d')
+        return date_obj.strftime('%d/%m/%Y')
+    except:
+        return iso_date
+
+def send_email_notification(recipients, subject, message):
+    """
+    Envía correos electrónicos a múltiples destinatarios
+    """
+    # Cargar las credenciales desde variables de entorno
+    smtp_server = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+    smtp_port = int(os.getenv('SMTP_PORT', 587))
+    smtp_user = os.getenv('SMTP_USER', 'tecmodfechas@gmail.com')  
+    smtp_password = os.getenv('SMTP_PASSWORD', 'w s x q j a l p f r w l p w e n')  
+    
+    # Crear el remitente
+    sender = f"Sistema TEC <{smtp_user}>"
+    
+    # Configurar servidor SMTP
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.ehlo()
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        
+        # Para cada destinatario, enviar un correo personalizado
+        success_count = 0
+        error_count = 0
+        
+        # Limitar el número de destinatarios para evitar sobrecarga
+        batch_size = 50
+        recipient_batches = [recipients[i:i + batch_size] for i in range(0, len(recipients), batch_size)]
+        
+        for batch in recipient_batches:
+            for recipient in batch:
+                try:
+                    print(f"Enviando correo a {recipient}...")
+                    msg = MIMEMultipart()
+                    msg['From'] = sender
+                    msg['To'] = recipient
+                    msg['Subject'] = subject
+                    
+                    # Agregar cuerpo del mensaje
+                    msg.attach(MIMEText(message, 'html'))
+                    
+                    # Enviar correo
+                    server.sendmail(sender, recipient, msg.as_string())
+                    success_count += 1
+                except Exception as e:
+                    print(f"Error enviando correo a {recipient}: {str(e)}")
+                    error_count += 1
+        
+        print(f"Correos enviados: {success_count}, Errores: {error_count}")
+        server.quit()
+        return True, success_count, error_count
+    except Exception as e:
+        print(f"Error en servidor SMTP: {str(e)}")
+        return False, 0, 0
+
+
 @app.route('/api/procesos/<int:id_proceso>/fechas', methods=['PUT'])
 @cross_origin()
 def actualizar_fechas_proceso(id_proceso):
@@ -1561,6 +1627,7 @@ def actualizar_fechas_proceso(id_proceso):
         fecha_inicio = data.get('fechaInicio')
         fecha_final = data.get('fechaFinal')
         id_admin = data.get('id_admin')
+        notificar_estudiantes = data.get('notificarEstudiantes', False)
         
         # Validar fechas
         if not fecha_inicio or not fecha_final:
@@ -1578,7 +1645,7 @@ def actualizar_fechas_proceso(id_proceso):
                 "message": "La fecha de inicio no puede ser posterior a la fecha final"
             }), 400
         
-        # Actualizar fechas
+        # Actualizar fechas en la base de datos
         update_query = text("""
         UPDATE "Procesos"
         SET 
@@ -1595,13 +1662,120 @@ def actualizar_fechas_proceso(id_proceso):
             "id_proceso": id_proceso
         })
         
-        tipo_proceso = update_result.fetchone()
+        proceso_result = update_result.fetchone()
         
-        if not tipo_proceso:
+        if not proceso_result:
             return jsonify({
                 "status": "error",
                 "message": "Proceso no encontrado"
             }), 404
+            
+        tipo_proceso = proceso_result.tipo_proceso
+        
+        # Si se marcó la opción de notificar
+        if notificar_estudiantes:
+            # Obtener información del proceso, escuela y sede
+            sede_escuela_query = text("""
+            SELECT 
+                p."tipoProceso"[1] as tipo_proceso,
+                s.nombre[1] as nombre_sede,
+                e.nombre[1] as nombre_escuela,
+                p2.nombre[1] || ' ' || p2.apellido[1] || ' ' || p2.apellido[2] nombre_admin 
+            FROM 
+                "Procesos" p
+            JOIN 
+                "SedeEscuela" se ON p."id_sedeXescuela" = se."id_sedeXescuela"
+            JOIN 
+                "Sede" s ON se.id_sede = s.id_sede
+            JOIN 
+                "Escuela" e ON se.id_escuela = e.id_escuela
+            join "Administrativo" a on a."id_sedeXescuela" = p."id_sedeXescuela"
+            join "Persona" p2 on  a.id_persona_fk = p2.id_persona_escalar  
+            WHERE 
+                p.id_proceso = :id_proceso
+            """)
+            
+            sede_info = db.session.execute(sede_escuela_query, {"id_proceso": id_proceso}).fetchone()
+            
+            if sede_info:
+                # Obtener todos los correos de estudiantes
+                estudiantes_query = text("""
+                SELECT e.correo[1] as correo 
+                FROM "Persona" e
+                WHERE correo[1] LIKE '%@estudiantec.cr' 
+                """)
+                
+                estudiantes_result = db.session.execute(estudiantes_query)
+                
+                # Extraer correos a una lista
+                correos = [row.correo for row in estudiantes_result if row.correo]
+                
+                if correos:
+                    # Preparar contenido del correo
+                    fecha_inicio_formateada = format_date(fecha_inicio)
+                    fecha_final_formateada = format_date(fecha_final)
+                    
+                    subject = f"Actualización de fechas: Proceso de {tipo_proceso}"
+                    
+                    # Crear mensaje HTML más atractivo
+                    message = f"""
+                    <html>
+                    <head>
+                        <style>
+                            body {{ font-family: Arial, sans-serif; line-height: 1.6; }}
+                            .container {{ padding: 20px; border: 1px solid #ddd; border-radius: 5px; }}
+                            .header {{ background-color: #005085; color: white; padding: 10px; text-align: center; }}
+                            .content {{ padding: 15px; }}
+                            .footer {{ font-size: 12px; text-align: center; margin-top: 20px; color: #777; }}
+                            .highlight {{ background-color: #f0f7ff; padding: 10px; border-left: 3px solid #005085; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="header">
+                                <h2>Actualización de Fechas en Proceso</h2>
+                            </div>
+                            <div class="content">
+                                <p>Estimado(a) estudiante:</p>
+                                
+                                <p>Le informamos que la <strong>{sede_info.nombre_escuela}</strong> de la sede <strong>{sede_info.nombre_sede}</strong> 
+                                ha modificado las fechas del proceso de <strong>{tipo_proceso}</strong>.</p>
+                                
+                                <div class="highlight">
+                                    <p><strong>Nuevas fechas:</strong></p>
+                                    <p>Fecha de inicio: {fecha_inicio_formateada}</p>
+                                    <p>Fecha de finalización: {fecha_final_formateada}</p>
+                                </div>
+                                
+                                <p>Por favor, tome en cuenta estas nuevas fechas para realizar sus trámites correspondientes.</p>
+                                
+                                <p>Atentamente,<br>
+                                {sede_info.nombre_admin}<br>
+                                Administrador del Sistema</p>
+                            </div>
+                            <div class="footer">
+                                <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+                                <p>© {datetime.now().year} Instituto Tecnológico de Costa Rica</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    # Enviar correos
+                    success, sent_count, error_count = send_email_notification(correos, subject, message)
+                    
+                    # Registrar en historial con detalles del envío
+                    accion_texto = f"Modificación de fechas con notificación a estudiantes ({sent_count} enviados, {error_count} fallidos)"
+                else:
+                    # No se encontraron correos de estudiantes
+                    accion_texto = "Modificación de fechas (no se encontraron correos para notificar)"
+            else:
+                # No se pudo obtener información de sede/escuela
+                accion_texto = "Modificación de fechas (error al obtener información de sede/escuela)"
+        else:
+            # Simplemente modificación de fechas sin notificación
+            accion_texto = "Modificación de fechas"
         
         # Registrar en historial
         historial_query = text("""
@@ -1610,22 +1784,24 @@ def actualizar_fechas_proceso(id_proceso):
         """)
         
         db.session.execute(historial_query, {
-            "accion": "Modificación de fechas",
+            "accion": accion_texto,
             "id_proceso": id_proceso,
             "id_admin": id_admin
         })
         
         db.session.commit()
-        
         return jsonify({
-            "status": "success",
-            "message": "Fechas actualizadas correctamente"
-        }), 200
+            "status": "success", 
+            "message": "Fechas actualizadas correctamente" + 
+                (" y notificaciones enviadas a los estudiantes" if notificar_estudiantes else "")
+        })
         
     except Exception as e:
         db.session.rollback()
+        import traceback
+        print(traceback.format_exc())
         return jsonify({
-            "status": "error",
+            "status": "error", 
             "message": f"Error al actualizar fechas: {str(e)}"
         }), 500
 

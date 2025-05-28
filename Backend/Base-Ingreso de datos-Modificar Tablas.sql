@@ -1745,4 +1745,120 @@ COMMENT ON TABLE public."HistorialProcesos" IS 'Registra los cambios realizados 
 insert into public."Procesos" (id_proceso, "tipoProceso", "fechaInicio", "fechaFinal", estado, "id_sedeXescuela", id_admin) values
 (1, ARRAY['Inclusion'], '2025-05-27', '2025-06-03', true, 17, 11),
 (2, ARRAY['Levantamiento'], '2025-05-27', '2025-06-03', true, 17, 11)
+
+
+
+WITH RankedProcesos AS (
+            SELECT 
+                p.*,
+                ROW_NUMBER() OVER (PARTITION BY p."tipoProceso"[1] ORDER BY p.id_proceso DESC) as rn
+            FROM 
+                "Procesos" p
+            WHERE 
+                p."id_sedeXescuela" = 17
+        )
+        SELECT 
+            id_proceso,
+            "tipoProceso"[1] as tipo_proceso,
+            "fechaInicio",
+            "fechaFinal",
+            estado,
+            "id_sedeXescuela",
+            id_admin
+        FROM 
+            RankedProcesos
+        WHERE 
+            rn = 1
+        ORDER BY 
+            "tipoProceso"[1]
             
+            
+            
+SELECT 
+            h.id_historial,
+            h.fecha_accion,
+            h.accion,
+            h.id_proceso,
+            p."tipoProceso"[1] as tipo_proceso,
+            a."Rol"[1] as rol_admin,
+            pe.nombre[1] || ' ' || pe.apellido[1] as nombre_usuario
+        FROM 
+            "HistorialProcesos" h
+        INNER JOIN 
+            "Procesos" p ON h.id_proceso = p.id_proceso
+        INNER JOIN
+            "Administrativo" a ON h.id_admin = a.id_admin
+        INNER JOIN
+            "Persona" pe ON a.id_persona_fk = pe.id_persona_escalar
+        WHERE 
+            p."id_sedeXescuela" = 17
+        ORDER BY 
+            h.fecha_accion DESC
+        LIMIT 10            
+        
+        
+        
+SELECT 
+            id_proceso,
+            "tipoProceso"[1] as tipo_proceso,
+            "id_sedeXescuela",
+            estado
+        FROM 
+            "Procesos"
+        WHERE 
+            id_proceso = 1   
+            
+            
+SELECT COUNT(*) as count
+            FROM "Procesos"
+            WHERE 
+                "id_sedeXescuela" = 17 AND
+                "tipoProceso"[1] = 'Levantamiento' AND
+                estado = true AND
+                id_proceso != 2
+                
+UPDATE "Procesos"
+        SET estado = NOT estado
+        WHERE id_proceso = 1
+        RETURNING estado
+        
+INSERT INTO "HistorialProcesos" (fecha_accion, accion, id_proceso, id_admin)
+        VALUES (NOW(), 'Activación de proceso', 1, 11)
+        
+
+        
+UPDATE "Procesos"
+        SET 
+            "fechaInicio" = '2025-05-27',
+            "fechaFinal" = '2025-05-05'
+        WHERE 
+            id_proceso = 1
+        RETURNING "tipoProceso"[1] as tipo_proceso
+        
+INSERT INTO "HistorialProcesos" (fecha_accion, accion, id_proceso, id_admin)
+        VALUES (NOW(), 'Modificación de fechas', 1, 11)   
+        
+        
+        
+SELECT 
+                p."tipoProceso"[1] as tipo_proceso,
+                s.nombre as nombre_sede,
+                e.nombre as nombre_escuela,
+                p2.nombre[1] || ' ' || p2.apellido[1] || ' ' || p2.apellido[2] nombre_admin 
+            FROM 
+                "Procesos" p
+            JOIN 
+                "SedeEscuela" se ON p."id_sedeXescuela" = se."id_sedeXescuela"
+            JOIN 
+                "Sede" s ON se.id_sede = s.id_sede
+            JOIN 
+                "Escuela" e ON se.id_escuela = e.id_escuela
+            join "Administrativo" a on a."id_sedeXescuela" = p."id_sedeXescuela"
+            join "Persona" p2 on  a.id_persona_fk = p2.id_persona_escalar  
+            WHERE 
+                p.id_proceso = 1     
+                
+                
+SELECT e.correo 
+                FROM "Persona" e
+                WHERE correo[1] LIKE '%@estudiantec.cr'            
