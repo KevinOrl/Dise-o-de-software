@@ -20,7 +20,6 @@ const FormularioInclusion = ({ curso, onBack }) => {
 
   const handleSubmit = (datosFinales) => {
     console.log('Datos a enviar:', datosFinales);
-    // Aquí puedes hacer POST al backend o redirigir
   };
 
   return (
