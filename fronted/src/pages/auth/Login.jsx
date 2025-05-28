@@ -139,6 +139,11 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      {/* Agregar skip link */}
+      <a href="#login-form" className="skip-link">
+        Saltar al formulario de inicio de sesión
+      </a>
+
       <header className="login-header">
         <img 
           src={logoTec} 
@@ -171,15 +176,12 @@ const Login = () => {
               </div>
             )}
             
-            <form onSubmit={handleSubmit} className="login-form" aria-labelledby="login-title">
+            {/* Añadir id para el skip link */}
+            <form id="login-form" onSubmit={handleSubmit} className="login-form" aria-labelledby="login-title">
               <div className="form-group">
                 <label htmlFor="email">Correo electrónico</label>
                 <div className="input-container">
-                  <span className="input-icon" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
-                    </svg>
-                  </span>
+                  {/* Eliminar el span con el icono SVG */}
                   <input
                     type="email"
                     id="email"
@@ -202,11 +204,7 @@ const Login = () => {
               <div className="form-group">
                 <label htmlFor="password">Contraseña</label>
                 <div className="input-container">
-                  <span className="input-icon" aria-hidden="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                      <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
-                    </svg>
-                  </span>
+                  {/* Eliminar el span con el icono SVG */}
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
