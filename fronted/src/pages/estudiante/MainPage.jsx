@@ -45,7 +45,13 @@ const MainPage = () => {
     { label: 'Mi Historial Académico', action: () => setVistaActual('') },
     { label: 'Historial Solicitudes', action: () => setVistaActual('solicitudes') },
     { label: 'Historial Retiro de cursos', action: () => setVistaActual('retiros') },
-    { label: 'Ayuda', action: () => setVistaActual('') },
+    <a
+      href="mailto:femurillo@estudiantec.cr?subject=Ayuda%20con%20el%20Sistema&body=Describa%20el%20problema%20aqui..."
+      onClick={() => alert('Se abrirá tu correo para enviar el mensaje de ayuda')}
+      className="block px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+    >
+      Ayuda
+    </a>
   ];
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -70,18 +76,30 @@ const MainPage = () => {
 
             {menuOpen && (
               <div className="absolute left-0 top-full mt-2 bg-white text-black shadow-lg rounded-md w-64 py-2 z-50">
-                {opciones.map((op, index) => (
-                  <div
-                    key={index}
-                    onClick={() => {
-                      op.action();
-                      setMenuOpen(false);
-                    }}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
-                  >
-                    {op.label}
-                  </div>
-                ))}
+                {opciones.map((op, index) =>
+                  op.label !== 'Ayuda' ? (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        op.action();
+                        setMenuOpen(false);
+                      }}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                    >
+                      {op.label}
+                    </div>
+                  ) : null
+                )}
+                <a
+                  href="mailto:femurillo@estudiantec.cr?subject=Ayuda%20con%20el%20Sistema&body=Describa%20el%20problema%20aquí..."
+                  onClick={() => {
+                    alert('📧 Se abrirá tu correo para enviar el mensaje de ayuda');
+                    setMenuOpen(false);
+                  }}
+                  className="block px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
+                >
+                  Ayuda
+                </a>
               </div>
             )}
           </div>
@@ -103,7 +121,13 @@ const MainPage = () => {
             <FaFileAlt />
             <span>Mi informe</span>
           </button>
-          <button className="flex items-center space-x-1">
+          <button
+            className="flex items-center space-x-1"
+            onClick={() => {
+              localStorage.clear(); // Borra los datos del usuario
+              navigate('/'); // Redirige al login
+            }}
+          >
             <FaSignOutAlt />
             <span>Salir</span>
           </button>
