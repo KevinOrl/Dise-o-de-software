@@ -19,111 +19,71 @@ const NavBar = () => {
     
     return () => clearInterval(timer);
   }, []);
-
+  
+  // Formatear hora y fecha
+  const formattedTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formattedDate = currentTime.toLocaleDateString('es-ES', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  
   const handleLogout = () => {
     localStorage.removeItem('userData');
-    localStorage.removeItem('userType');
-    navigate('/login');
+    navigate('/');
   };
-
-  // Formatear hora y fecha
-  const formattedTime = currentTime.toLocaleTimeString('es-CR', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-
-  const formattedDate = currentTime.toLocaleDateString('es-CR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-
-  const toggleMenu = () => {
-    setShowMenu(!showMenu);
-  };
-
-  // Agregar manejo de teclado al menú
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape' && showMenu) {
-      toggleMenu();
-    }
-  };
-
-  // Añadir en useEffect
-  useEffect(() => {
-    if (showMenu) {
-      document.addEventListener('keydown', handleKeyDown);
-      return () => document.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [showMenu]);
-
+  
   return (
-    <header className="barra-superior">
-      <div className="perfil-seccion">
-        <div className="foto-contenedor">
+    <nav className="navbar">
+      <div className="navbar-left">
+        <button 
+          className="menu-button"
+          onClick={() => setShowMenu(!showMenu)}
+          aria-expanded={showMenu}
+          aria-controls="menu-opciones"
+        >
+          ☰
+        </button>
+        <div className="user-info">
           <img 
-            src={defaultAvatar} 
-            alt="Foto del administrador" 
-            className="foto-perfil"
+            src={userData.avatar || defaultAvatar} 
+            alt="Avatar" 
+            className="user-avatar"
           />
-        </div>
-        
-        <div className="info-opciones">
-          <div className="info-usuario">
-            <strong className="nombre-usuario">
-              {userData.nombre || 'María Fernanda'} {userData.apellido || 'Jiménez'}
-            </strong>
-            <span className="rol-usuario">
-              {userData.role || 'COORDINADOR'}
-            </span>
-          </div>
-          
-          <div className="opciones-dropdown">
-            <button 
-              className="opciones-btn"
-              onClick={toggleMenu}
-              aria-expanded={showMenu}
-              aria-controls="menu-opciones"
-            >
-              <span className="icono-opciones">≡</span>
-              Opciones
-            </button>
-            
-            {showMenu && (
-              <nav id="menu-opciones" className="menu-opciones">
-                <Link to="/admin/solicitudes-levantamiento">Solicitudes de levantamiento</Link>
-                <Link to="/admin/solicitudes-inclusiones">Solicitudes de inclusiones</Link>
-                <Link to="/admin/habilitar-procesos">Habilitar Procesos</Link>
-                <a 
-                  href="mailto:kevinnc0506@gmail.com?subject=Ayuda%20con%20el%20Sistema&body=Descripci%C3%B3n%20del%20problema%3A%0A%0A"
-                  className="menu-link"
-                  title="Enviar correo de ayuda"
-                >
-                  Ayuda
-                </a>
-              </nav>
-            )}
+          <div className="user-details">
+            <span className="user-name">{userData.nombre || 'Usuario'}</span>
+            <span className="user-role">{userData.rol || 'Administrador'}</span>
           </div>
         </div>
       </div>
       
-      <div className="tiempo-seccion">
-        Hora: {formattedTime} | Fecha: {formattedDate}
+      <div className="navbar-right">
+        <div className="datetime-info">
+          <span className="time">Hora: {formattedTime}</span>
+          <span className="date">Fecha: {formattedDate}</span>
+        </div>
+        <button className="logout-button" onClick={handleLogout}>
+          Cerrar Sesión
+        </button>
       </div>
       
-      <div className="logout-seccion">
-        <div className="logout-container">
-          <button 
-            className="logout-btn"
-            onClick={handleLogout}
-            aria-label="Cerrar sesión"
+      {showMenu && (
+        <nav id="menu-opciones" className="menu-opciones">
+          <Link to="/admin/solicitudes-levantamiento">Solicitudes de levantamiento</Link>
+          <Link to="/admin/solicitudes-inclusiones">Solicitudes de inclusiones</Link>
+          <Link to="/admin/habilitar-procesos">Habilitar Procesos</Link>
+          {/* Enlace de ayuda exactamente como solicitado */}
+          <a
+            href="mailto:kevnunez@estudiantec.cr?subject=Ayuda%20con%20el%20Sistema&body=Describa%20el%20problema%20aqui..."
+            onClick={() => alert('Se abrirá tu correo para enviar el mensaje de ayuda')}
+            className="block px-4 py-2 hover:bg-gray-100 cursor-pointer rounded-md"
           >
-            <span className="logout-icono">→</span>
-          </button>
-          <span className="logout-text">Salir</span>
-        </div>
-      </div>
-    </header>
+            Ayuda
+          </a>
+        </nav>
+      )}
+    </nav>
   );
 };
 

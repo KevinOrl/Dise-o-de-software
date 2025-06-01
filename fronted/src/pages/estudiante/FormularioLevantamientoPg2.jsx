@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,12 +13,19 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
 
   const navigate = useNavigate();
 
+  // Efecto para limpiar el detalle_rn cuando se cambia el estado_rn a "no"
+  useEffect(() => {
+    if (datos.estado_rn === 'no') {
+      setDatos(prev => ({ ...prev, detalle_rn: '' }));
+    }
+  }, [datos.estado_rn]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setDatos((prev) => ({ ...prev, [name]: value }));
   };
 
-    const handleSubmit = async () => {
+  const handleSubmit = async () => {
     try {
         const estudiante = JSON.parse(localStorage.getItem('userData'));
         if (!estudiante?.id) {
@@ -50,7 +57,7 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
         console.error(err);
         alert('Error al conectar con el servidor');
     }
-    };
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-100 rounded">
@@ -79,21 +86,42 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
 
         <div>
           <label className="block mb-1">¿Presenta estado RN en el curso?</label>
-          <select name="estado_rn" value={datos.estado_rn} onChange={handleChange} className="w-full border p-2 rounded">
+          <select 
+            name="estado_rn" 
+            value={datos.estado_rn} 
+            onChange={handleChange} 
+            className="w-full border p-2 rounded"
+            aria-controls="detalle-rn-container"
+          >
             <option value="">Seleccione una opción</option>
             <option value="si">Sí</option>
             <option value="no">No</option>
           </select>
         </div>
 
-        <div>
-          <label className="block mb-1">Si marcó sí, indique el estado RN que presenta</label>
-          <input name="detalle_rn" placeholder="Coloque un número" value={datos.detalle_rn} onChange={handleChange} className="w-full border p-2 rounded" />
-        </div>
+        {/* Mostrar el campo detalle_rn solo si estado_rn es "si" */}
+        {datos.estado_rn === 'si' && (
+          <div id="detalle-rn-container">
+            <label className="block mb-1">Indique el estado RN que presenta</label>
+            <input 
+              name="detalle_rn" 
+              placeholder="Coloque un número" 
+              value={datos.detalle_rn} 
+              onChange={handleChange} 
+              className="w-full border p-2 rounded" 
+            />
+          </div>
+        )}
 
         <div className="col-span-2">
           <label className="block mb-1">Explique brevemente su razón de la solicitud</label>
-          <textarea name="motivo" placeholder="Razon personal por la cual desea el levantamiento" value={datos.motivo} onChange={handleChange} className="w-full border p-2 rounded h-24" />
+          <textarea 
+            name="motivo" 
+            placeholder="Razon personal por la cual desea el levantamiento" 
+            value={datos.motivo} 
+            onChange={handleChange} 
+            className="w-full border p-2 rounded h-24" 
+          />
         </div>
       </div>
 

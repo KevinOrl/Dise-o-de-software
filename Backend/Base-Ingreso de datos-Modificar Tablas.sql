@@ -1861,4 +1861,11 @@ SELECT
                 
 SELECT e.correo 
                 FROM "Persona" e
-                WHERE correo[1] LIKE '%@estudiantec.cr'            
+                WHERE correo[1] LIKE '%@estudiantec.cr'         
+                
+select * from "HistorialProcesos" hp                 
+
+SELECT a.id_admin, a."id_sedeXescuela", a.id_departamento, a."Rol", p.nombre, p.apellido, p."contraseña"
+                FROM "Administrativo" a
+                JOIN "Persona" p ON p.id_persona_escalar = a.id_persona_fk
+                WHERE LOWER(p.correo[1]) = 'mf.jimenez@itcr.ac.cr'
