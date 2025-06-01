@@ -42,7 +42,7 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
 
         if (response.data.status === 'success') {
         alert('Solicitud enviada exitosamente');
-        navigate('/estudiante');
+        window.location.href = '/estudiante';
         } else {
         alert('Error al enviar solicitud');
         }
@@ -54,17 +54,27 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
 
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-100 rounded">
-      <h2 className="text-xl font-semibold text-[#00548f] mb-6">Formulario de Levantamiento</h2>
+      <div className="flex justify-between mb-4">
+        <p className="text-sm text-gray-500">Página 2 de 2</p>
+        <button
+          onClick={() => navigate('/estudiante')}
+          className="text-sm text-red-600 hover:underline"
+        >
+          Salir del formulario
+        </button>
+      </div>
+
+      <h2 className="text-xl font-semibold text-[#00548f] mb-4">Formulario de Levantamiento</h2>
 
       <div className="grid grid-cols-2 gap-6">
         <div>
           <label className="block mb-1">¿Cuántos créditos espera matricular?</label>
-          <input name="creditos_matricular" value={datos.creditos_matricular} onChange={handleChange} className="w-full border p-2 rounded" />
+          <input name="creditos_matricular" placeholder="Coloque un número" value={datos.creditos_matricular} onChange={handleChange} className="w-full border p-2 rounded" />
         </div>
 
         <div>
           <label className="block mb-1">¿Cuántas veces ha intentado matricular el curso?</label>
-          <input name="intentos" value={datos.intentos} onChange={handleChange} className="w-full border p-2 rounded" />
+          <input name="intentos" placeholder="Coloque el número de veces" value={datos.intentos} onChange={handleChange} className="w-full border p-2 rounded" />
         </div>
 
         <div>
@@ -78,20 +88,26 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
 
         <div>
           <label className="block mb-1">Si marcó sí, indique el estado RN que presenta</label>
-          <input name="detalle_rn" value={datos.detalle_rn} onChange={handleChange} className="w-full border p-2 rounded" />
+          <input name="detalle_rn" placeholder="Coloque un número" value={datos.detalle_rn} onChange={handleChange} className="w-full border p-2 rounded" />
         </div>
 
         <div className="col-span-2">
           <label className="block mb-1">Explique brevemente su razón de la solicitud</label>
-          <textarea name="motivo" value={datos.motivo} onChange={handleChange} className="w-full border p-2 rounded h-24" />
+          <textarea name="motivo" placeholder="Razon personal por la cual desea el levantamiento" value={datos.motivo} onChange={handleChange} className="w-full border p-2 rounded h-24" />
         </div>
       </div>
 
       <div className="mt-6 flex justify-between">
-        <button onClick={onBack} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+        <button
+          onClick={onBack}
+          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+        >
           ← Regresar
         </button>
-        <button onClick={handleSubmit} className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+        <button
+          onClick={handleSubmit}
+          className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+        >
           Finalizar solicitud
         </button>
       </div>
