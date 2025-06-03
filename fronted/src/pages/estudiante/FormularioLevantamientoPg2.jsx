@@ -64,7 +64,7 @@ const FormularioLevantamientoPg2 = ({ formData, onBack }) => {
       <div className="flex justify-between mb-4">
         <p className="text-sm text-gray-500">Página 2 de 2</p>
         <button
-          onClick={() => navigate('/estudiante')}
+          onClick={() => window.location.href = '/estudiante'} 
           className="text-sm text-red-600 hover:underline"
         >
           Salir del formulario

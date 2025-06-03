@@ -24,7 +24,19 @@ const HistorialSolicitudes = ({ idEstudiante }) => {
 
   return (
     <div className="w-full max-w-5xl mx-auto mt-12">
-      <h2 className="text-lg font-semibold text-center bg-[#003366] text-white py-2 rounded-t">Historial Solicitudes</h2>
+      <div className="flex justify-end mb-2">
+        <button
+          onClick={() => window.location.href = '/estudiante'}
+          className="text-sm text-red-600 hover:underline"
+        >
+          Volver al inicio
+        </button>
+      </div>
+
+      <h2 className="text-lg font-semibold text-center bg-[#003366] text-white py-2 rounded-t">
+        Historial Solicitudes
+      </h2>
+      
       <table className="w-full border border-gray-300 text-sm bg-white shadow">
         <thead className="bg-gray-100 text-left">
           <tr>

@@ -35,13 +35,28 @@ const MatriculasDisponibles = ({ idEstudiante }) => {
     fetchCursos(tipoSeleccionado);
   }, [tipoSeleccionado]);
 
-  const handleAbrirFormulario = (curso) => {
-    setCursoSeleccionado(curso);
-    setMostrarFormulario(true);
-  };
+const handleAbrirFormulario = (curso) => {
+  if (tipoSeleccionado === 'Semestre') {
+    alert('Este tipo de matrícula aún no está disponible.');
+    return;
+  }
+  setCursoSeleccionado(curso);
+  setMostrarFormulario(true);
+};
 
   return (
     <div className="w-full max-w-6xl mx-auto mt-12">
+      {!mostrarFormulario && (
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => window.location.href = '/estudiante'}
+            className="text-sm text-red-600 hover:underline"
+          >
+            Volver al inicio
+          </button>
+        </div>
+      )}
+
       <h2 className="text-lg font-semibold text-center bg-[#003366] text-white py-2 rounded-t">
         Matrículas Disponibles
       </h2>
